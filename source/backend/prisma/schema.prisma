@@ -1,0 +1,189 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Store {
+  id                    Int                     @id @default(autoincrement())
+  name                  String                  @db.VarChar(255)
+  ownerName             String?                 @map("owner_name") @db.VarChar(255)
+  address               String?                 @db.VarChar(255)
+  phone                 String?                 @db.VarChar(50)
+  status                String                  @default("active") @db.VarChar(50)
+  createdAt             DateTime                @default(now()) @map("created_at")
+  products              Product[]
+  orders                Order[]
+  logisticsPartners     StoreLogisticsPartner[]
+
+  @@map("stores")
+}
+
+model LogisticsCompany {
+  id                    Int                     @id @default(autoincrement())
+  name                  String                  @db.VarChar(255)
+  baseFee               Decimal                 @map("base_fee") @db.Decimal(10, 2)
+  area                  String?                 @db.VarChar(100)
+  status                String                  @default("active") @db.VarChar(50)
+  createdAt             DateTime                @default(now()) @map("created_at")
+  orders                Order[]
+  storePartners         StoreLogisticsPartner[]
+
+  @@map("logistics_companies")
+}
+
+model StoreLogisticsPartner {
+  id                    Int                     @id @default(autoincrement())
+  storeId               Int                     @map("store_id")
+  logisticsCompanyId    Int                     @map("logistics_company_id")
+  customFee             Decimal?                @map("custom_fee") @db.Decimal(10, 2)
+  status                String                  @default("active") @db.VarChar(50)
+  createdAt             DateTime                @default(now()) @map("created_at")
+
+  store                 Store                   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  logisticsCompany      LogisticsCompany        @relation(fields: [logisticsCompanyId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, logisticsCompanyId])
+  @@map("store_logistics_partners")
+}
+
+model Category {
+  id                    Int                     @id @default(autoincrement())
+  parentId              Int?                    @map("parent_id")
+  name                  String                  @db.VarChar(255)
+  slug                  String                  @unique @db.VarChar(255)
+  seoTitle              String?                 @map("seo_title") @db.VarChar(255)
+  seoDescription        String?                 @map("seo_description") @db.VarChar(500)
+  status                String                  @default("active") @db.VarChar(50)
+  createdAt             DateTime                @default(now()) @map("created_at")
+
+  parent                Category?               @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children              Category[]              @relation("CategoryToCategory")
+  products              Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id                    Int                     @id @default(autoincrement())
+  storeId               Int                     @map("store_id")
+  categoryId            Int                     @map("category_id")
+  sku                   String                  @unique @db.VarChar(100)
+  name                  String                  @db.VarChar(255)
+  brand                 String?                 @db.VarChar(100)
+  price                 Decimal                 @db.Decimal(10, 2)
+  stockQuantity         Int                     @default(0) @map("stock_quantity")
+  imageUrl              String?                 @map("image_url") @db.VarChar(500)
+  shortDescription      String?                 @map("short_description") @db.VarChar(500)
+  slug                  String                  @unique @db.VarChar(255)
+  seoTitle              String?                 @map("seo_title") @db.VarChar(255)
+  seoDescription        String?                 @map("seo_description") @db.VarChar(500)
+  createdAt             DateTime                @default(now()) @map("created_at")
+
+  store                 Store                   @relation(fields: [storeId], references: [id])
+  category              Category                @relation(fields: [categoryId], references: [id])
+  prices                ProductPrice[]
+  promotions            Promotion[]
+  orderItems            OrderItem[]
+  comments              Comment[]
+
+  @@map("products")
+}
+
+model ProductPrice {
+  id                    Int                     @id @default(autoincrement())
+  productId             Int                     @map("product_id")
+  price                 Decimal                 @db.Decimal(10, 2)
+  effectiveFrom         DateTime                @map("effective_from")
+  createdAt             DateTime                @default(now()) @map("created_at")
+
+  product               Product                 @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_prices")
+}
+
+model Promotion {
+  id                    Int                     @id @default(autoincrement())
+  productId             Int                     @map("product_id")
+  name                  String                  @db.VarChar(255)
+  discountType          String                  @default("amount") @map("discount_type") @db.VarChar(50)
+  discountValue         Decimal                 @map("discount_value") @db.Decimal(10, 2)
+  startDate             DateTime                @map("start_date")
+  endDate               DateTime                @map("end_date")
+  createdAt             DateTime                @default(now()) @map("created_at")
+
+  product               Product                 @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("promotions")
+}
+
+model Customer {
+  id                    Int                     @id @default(autoincrement())
+  fullName              String                  @map("full_name") @db.VarChar(255)
+  phone                 String                  @unique @db.VarChar(50)
+  email                 String?                 @db.VarChar(255)
+  address               String?                 @db.VarChar(500)
+  createdAt             DateTime                @default(now()) @map("created_at")
+  orders                Order[]
+
+  @@map("customers")
+}
+
+model Order {
+  id                    Int                     @id @default(autoincrement())
+  orderCode             String                  @unique @map("order_code") @db.VarChar(100)
+  customerId            Int                     @map("customer_id")
+  storeId               Int                     @map("store_id")
+  logisticsCompanyId    Int                     @map("logistics_company_id")
+  shippingFee           Decimal                 @map("shipping_fee") @db.Decimal(10, 2)
+  grandTotal            Decimal                 @map("grand_total") @db.Decimal(10, 2)
+  status                String                  @default("pending") @db.VarChar(50)
+  createdAt             DateTime                @default(now()) @map("created_at")
+
+  customer              Customer                @relation(fields: [customerId], references: [id])
+  store                 Store                   @relation(fields: [storeId], references: [id])
+  logisticsCompany      LogisticsCompany        @relation(fields: [logisticsCompanyId], references: [id])
+  items                 OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id                    Int                     @id @default(autoincrement())
+  orderId               Int                     @map("order_id")
+  productId             Int                     @map("product_id")
+  quantity              Int
+  price                 Decimal                 @db.Decimal(10, 2)
+  lineTotal             Decimal                 @map("line_total") @db.Decimal(10, 2)
+
+  order                 Order                   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product               Product                 @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Comment {
+  id                    Int                     @id @default(autoincrement())
+  productId             Int                     @map("product_id")
+  customerName          String                  @map("customer_name") @db.VarChar(255)
+  rating                Int                     @default(5)
+  content               String                  @db.Text
+  createdAt             DateTime                @default(now()) @map("created_at")
+
+  product               Product                 @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model AdminUser {
+  id                    Int                     @id @default(autoincrement())
+  username              String                  @unique @db.VarChar(100)
+  passwordHash          String                  @map("password_hash") @db.VarChar(255)
+  role                  String                  @default("admin") @db.VarChar(50)
+  createdAt             DateTime                @default(now()) @map("created_at")
+
+  @@map("admin_users")
+}

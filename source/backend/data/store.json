@@ -1,0 +1,125 @@
+{
+  "stores": [
+    {
+      "id": 1,
+      "name": "Gia Dung An Phat",
+      "slug": "gia-dung-an-phat",
+      "phone": "0901234567",
+      "email": "anphat@example.com",
+      "address": "12 Le Loi, Quan 1, TP.HCM",
+      "status": "active"
+    }
+  ],
+  "logisticsCompanies": [
+    {
+      "id": 1,
+      "name": "Nhanh Viet Express",
+      "slug": "nhanh-viet-express",
+      "phone": "19001001",
+      "baseFee": 25000,
+      "rating": 4.8,
+      "status": "active"
+    }
+  ],
+  "storeLogisticsPartners": [
+    {
+      "id": 1,
+      "storeId": 1,
+      "logisticsCompanyId": 1,
+      "baseFee": 25000,
+      "feePerKm": 3500,
+      "serviceArea": "TP.HCM va cac tinh lan can",
+      "rating": 4.8,
+      "status": "active"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "parentId": null,
+      "name": "Nha bep",
+      "slug": "nha-bep",
+      "seoTitle": "Do gia dung nha bep gia tot",
+      "seoDescription": "Noi, chao, may xay va dung cu nha bep chinh hang.",
+      "sortOrder": 1,
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "parentId": null,
+      "name": "Ve sinh nha cua",
+      "slug": "ve-sinh-nha-cua",
+      "seoTitle": "Do ve sinh nha cua tien ich",
+      "seoDescription": "Dung cu ve sinh nha cua chat luong, de su dung.",
+      "sortOrder": 2,
+      "status": "active"
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "storeId": 1,
+      "categoryId": 1,
+      "name": "Noi chien khong dau 5L",
+      "slug": "noi-chien-khong-dau-5l",
+      "sku": "NCKD-5L",
+      "shortDescription": "Dung tich 5L, dieu khien co, phu hop gia dinh 3-5 nguoi.",
+      "description": "Noi chien khong dau giup nau an nhanh, giam dau mo va de ve sinh.",
+      "brand": "KitchenPro",
+      "imageUrl": "https://images.unsplash.com/photo-1585515320310-259814833e62?auto=format&fit=crop&w=900&q=80",
+      "stockQuantity": 34,
+      "status": "active",
+      "seoTitle": "Noi chien khong dau 5L KitchenPro",
+      "seoDescription": "Mua noi chien khong dau 5L chinh hang, giao nhanh."
+    },
+    {
+      "id": 2,
+      "storeId": 1,
+      "categoryId": 2,
+      "name": "May hut bui cam tay",
+      "slug": "may-hut-bui-cam-tay",
+      "sku": "MHB-CT",
+      "shortDescription": "Nho gon, pin sac, hut bui khe hep va sofa.",
+      "description": "May hut bui cam tay cong suat on dinh, phu hop can ho va oto.",
+      "brand": "CleanMate",
+      "imageUrl": "https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=900&q=80",
+      "stockQuantity": 21,
+      "status": "active",
+      "seoTitle": "May hut bui cam tay CleanMate",
+      "seoDescription": "May hut bui cam tay pin sac, gia tot, giao nhanh."
+    }
+  ],
+  "productPrices": [
+    {
+      "id": 1,
+      "productId": 1,
+      "price": 1290000,
+      "startsAt": "2026-01-01",
+      "endsAt": null,
+      "note": "Gia niem yet"
+    },
+    {
+      "id": 2,
+      "productId": 2,
+      "price": 690000,
+      "startsAt": "2026-01-01",
+      "endsAt": null,
+      "note": "Gia niem yet"
+    }
+  ],
+  "promotions": [
+    {
+      "id": 1,
+      "productId": 1,
+      "name": "Giam gia cuoi tuan",
+      "discountType": "percent",
+      "discountValue": 10,
+      "startsAt": "2026-06-01",
+      "endsAt": "2026-12-31",
+      "status": "active"
+    }
+  ],
+  "customers": [],
+  "orders": [],
+  "orderItems": []
+}

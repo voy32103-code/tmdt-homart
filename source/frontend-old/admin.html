@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hệ thống quản trị - HomeMart</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">HomeMart Admin</a>
+    <nav>
+      <a href="/">Cửa hàng</a>
+      <a href="/admin.html">Quản trị</a>
+      <button id="logoutButton" class="nav-button hidden" type="button">Đăng xuất</button>
+    </nav>
+  </header>
+
+  <main id="loginPanel" class="login-panel">
+    <form id="loginForm" class="stack-form login-form">
+      <h1>Đăng nhập hệ thống quản trị</h1>
+      <label>Tài khoản<input name="username" value="admin" required placeholder="Nhập tài khoản quản trị"></label>
+      <label>Mật khẩu<input name="password" type="password" value="admin123" required placeholder="Nhập mật khẩu"></label>
+      <button type="submit">Đăng nhập</button>
+      <p id="loginMessage" class="muted"></p>
+    </form>
+  </main>
+
+  <main id="adminApp" class="admin-layout hidden">
+    <section class="admin-top">
+      <h1>Quản lý bán hàng</h1>
+      <div id="summary" class="summary"></div>
+    </section>
+
+    <section class="admin-section">
+      <div class="section-title">
+        <h2>Thống kê & Báo cáo doanh thu</h2>
+      </div>
+      <!-- Bộ lọc thời gian -->
+      <div class="report-filters card">
+        <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto; align-items: flex-end; gap: 16px; margin-bottom: 0;">
+          <label>Từ ngày<input type="date" id="reportFromDate"></label>
+          <label>Đến ngày<input type="date" id="reportToDate"></label>
+          <button type="button" id="btnFilterReport" style="margin-bottom: 0;">Lọc dữ liệu</button>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid" style="margin-top: 20px;">
+        <div class="kpi-card">
+          <div class="kpi-label">Tổng doanh thu</div>
+          <div class="kpi-value" id="kpiRevenue">0 đ</div>
+        </div>
+        <div class="kpi-card" id="kpiCardOrders" style="cursor: pointer;">
+          <div class="kpi-label">Tổng số đơn hàng</div>
+          <div class="kpi-value" id="kpiOrders">0</div>
+        </div>
+        <div class="kpi-card" id="kpiCardCompleted" style="cursor: pointer;">
+          <div class="kpi-label">Đơn hoàn thành</div>
+          <div class="kpi-value kpi-success" id="kpiCompleted">0</div>
+        </div>
+        <div class="kpi-card" id="kpiCardCancelled" style="cursor: pointer;">
+          <div class="kpi-label">Đơn bị hủy</div>
+          <div class="kpi-value kpi-danger" id="kpiCancelled">0</div>
+        </div>
+      </div>
+
+      <!-- Biểu đồ -->
+      <div class="charts-grid">
+        <div class="chart-container card">
+          <h3>Doanh thu theo ngày (VNĐ)</h3>
+          <div class="chart-canvas-wrap">
+            <canvas id="chartRevenueByDate"></canvas>
+          </div>
+        </div>
+        <div class="chart-container card">
+          <h3>Top 10 sản phẩm bán chạy</h3>
+          <div class="chart-canvas-wrap">
+            <canvas id="chartTopProducts"></canvas>
+          </div>
+        </div>
+        <div class="chart-container card">
+          <h3>Doanh thu theo danh mục</h3>
+          <div class="chart-canvas-wrap">
+            <canvas id="chartRevenueByCategory"></canvas>
+          </div>
+        </div>
+        <div class="chart-container card">
+          <h3>Trạng thái đơn hàng</h3>
+          <div class="chart-canvas-wrap">
+            <canvas id="chartOrderStatus"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <div class="section-title">
+        <h2>Danh mục sản phẩm</h2>
+      </div>
+      <form id="categoryForm" class="form-grid">
+        <input type="hidden" name="id">
+        <label>Tên danh mục<input name="name" required placeholder="Ví dụ: Đồ dùng nhà bếp"></label>
+        <label>Đường dẫn SEO (Slug)<input name="slug" placeholder="Ví dụ: do-dung-nha-bep"></label>
+        <label>Thứ tự hiển thị<input name="sortOrder" type="number" value="0" placeholder="Nhập thứ tự số"></label>
+        <label>Tiêu đề SEO (Title)<input name="seoTitle" placeholder="Tiêu đề hiển thị trên trình duyệt"></label>
+        <label class="wide">Mô tả SEO (Description)<input name="seoDescription" placeholder="Mô tả tóm tắt cho công cụ tìm kiếm"></label>
+        <button type="submit">Lưu danh mục</button>
+      </form>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tên danh mục</th><th>Đường dẫn (Slug)</th><th>Tiêu đề SEO</th><th>Thao tác</th></tr></thead>
+          <tbody id="categoryTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <div class="section-title">
+        <h2>Sản phẩm</h2>
+      </div>
+      <form id="productForm" class="form-grid">
+        <input type="hidden" name="id">
+        <label>Tên sản phẩm<input name="name" required placeholder="Nhập tên sản phẩm"></label>
+        <label>Mã sản phẩm (SKU)<input name="sku" required placeholder="Nhập mã SKU định danh"></label>
+        <label>Danh mục sản phẩm<select name="categoryId" required></select></label>
+        <label>Giá bán (VNĐ)<input name="price" type="number" min="0" required placeholder="Nhập giá bán"></label>
+        <label>Thương hiệu<input name="brand" placeholder="Nhập tên thương hiệu"></label>
+        <label>Số lượng tồn kho<input name="stockQuantity" type="number" min="0" required placeholder="Nhập số lượng tồn"></label>
+        <label class="wide">Hình ảnh sản phẩm (URL)<input name="imageUrl" type="url" placeholder="Nhập địa chỉ URL hình ảnh"></label>
+        <label class="wide">Mô tả ngắn sản phẩm<input name="shortDescription" placeholder="Nhập mô tả tóm tắt sản phẩm"></label>
+        <label>Tiêu đề SEO (Title)<input name="seoTitle" placeholder="Tiêu đề hiển thị công cụ tìm kiếm"></label>
+        <label>Mô tả SEO (Description)<input name="seoDescription" placeholder="Mô tả công cụ tìm kiếm"></label>
+        <button type="submit">Lưu sản phẩm</button>
+      </form>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Sản phẩm</th><th>Danh mục</th><th>Giá hiện tại</th><th>Tồn kho</th><th>Thao tác</th></tr></thead>
+          <tbody id="productTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <div class="section-title">
+        <h2>Giá bán và khuyến mại</h2>
+      </div>
+      <div class="split">
+        <form id="priceForm" class="stack-form">
+          <label>Sản phẩm áp dụng<select name="productId" required></select></label>
+          <label>Giá bán mới (VNĐ)<input name="price" type="number" min="0" required placeholder="Nhập giá bán mới"></label>
+          <label>Ngày bắt đầu áp dụng<input name="startsAt" type="date" required></label>
+          <label>Ghi chú thay đổi<input name="note" placeholder="Ví dụ: Điều chỉnh giá tháng 7"></label>
+          <button type="submit">Cập nhật giá bán</button>
+        </form>
+        <form id="promotionForm" class="stack-form">
+          <input type="hidden" name="id">
+          <label>Sản phẩm khuyến mại<select name="productId" required></select></label>
+          <label>Tên chương trình khuyến mại<input name="name" required placeholder="Ví dụ: Giảm giá mùa hè"></label>
+          <label>Hình thức giảm giá<select name="discountType"><option value="percent">Giảm theo phần trăm (%)</option><option value="amount">Giảm theo số tiền cụ thể</option></select></label>
+          <label>Mức giảm giá<input name="discountValue" type="number" min="0" required placeholder="Nhập số tiền hoặc % giảm"></label>
+          <label>Ngày bắt đầu<input name="startsAt" type="date" required></label>
+          <label>Ngày kết thúc<input name="endsAt" type="date" required></label>
+          <label>Trạng thái kích hoạt<select name="status"><option value="active">Đang hoạt động</option><option value="inactive">Ngừng hoạt động</option></select></label>
+          <button type="submit">Lưu thông tin khuyến mại</button>
+        </form>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Sản phẩm</th><th>Chương trình khuyến mại</th><th>Mức giảm</th><th>Thời gian áp dụng</th><th>Thao tác</th></tr></thead>
+          <tbody id="promotionTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <h2>Quản lý đơn hàng</h2>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span style="font-size: 14px; color: var(--text-light);">Lọc theo trạng thái:</span>
+          <select id="orderFilterSelect" style="width: auto; padding: 4px 8px; margin-bottom: 0;">
+            <option value="all">Tất cả đơn hàng</option>
+            <option value="pending">Chờ xác nhận</option>
+            <option value="confirmed">Đã xác nhận</option>
+            <option value="processing">Đang xử lý</option>
+            <option value="shipping">Đang giao hàng</option>
+            <option value="completed">Đã hoàn thành</option>
+            <option value="cancelled">Đã hủy</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Mã đơn hàng</th><th>Thông tin khách hàng</th><th>Đơn vị vận chuyển</th><th>Tổng thanh toán</th><th>Trạng thái đơn hàng</th><th>Thao tác</th></tr></thead>
+          <tbody id="orderTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <div class="section-title">
+        <h2>Bình luận & Đánh giá</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Khách hàng</th><th>Sản phẩm</th><th>Đánh giá</th><th>Nội dung bình luận</th><th>Thời gian</th><th>Thao tác</th></tr></thead>
+          <tbody id="commentTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <div class="section-title">
+        <h2>Đơn vị giao nhận</h2>
+      </div>
+      <form id="logisticsForm" class="form-grid">
+        <input type="hidden" name="id">
+        <label>Tên công ty giao nhận<input name="name" required placeholder="Ví dụ: Giao Hàng Nhanh"></label>
+        <label>Mã định danh (Slug)<input name="slug" placeholder="Ví dụ: giao-hang-nhanh"></label>
+        <label>Số điện thoại liên hệ<input name="phone" placeholder="Nhập số điện thoại công ty"></label>
+        <label>Phí vận chuyển cơ bản (VNĐ)<input name="baseFee" type="number" min="0" value="0" placeholder="Nhập phí cơ bản"></label>
+        <label>Đánh giá xếp hạng<input name="rating" type="number" min="0" max="5" step="0.1" value="5" placeholder="Từ 0 đến 5"></label>
+        <label>Trạng thái hoạt động<select name="status"><option value="active">Đang hoạt động</option><option value="inactive">Ngừng hoạt động</option></select></label>
+        <button type="submit">Lưu thông tin giao nhận</button>
+      </form>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Đơn vị vận chuyển</th><th>Phí cơ bản</th><th>Đánh giá</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+          <tbody id="logisticsTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <div class="section-title">
+        <h2>Đối tác Cửa hàng - Giao nhận</h2>
+      </div>
+      <form id="partnerForm" class="form-grid">
+        <input type="hidden" name="id">
+        <label>Mã cửa hàng<input name="storeId" type="number" min="1" value="1" required placeholder="Nhập mã cửa hàng"></label>
+        <label>Công ty giao nhận đối tác<select name="logisticsCompanyId" required></select></label>
+        <label>Phí vận chuyển cơ bản (VNĐ)<input name="baseFee" type="number" min="0" value="0" placeholder="Nhập phí cơ bản"></label>
+        <label>Phí phụ thu trên mỗi km (VNĐ/km)<input name="feePerKm" type="number" min="0" value="0" placeholder="Nhập phí theo km"></label>
+        <label>Đánh giá xếp hạng đối tác<input name="rating" type="number" min="0" max="5" step="0.1" value="5" placeholder="Từ 0 đến 5"></label>
+        <label>Trạng thái hợp tác<select name="status"><option value="active">Đang hoạt động</option><option value="inactive">Ngừng hoạt động</option></select></label>
+        <label class="wide">Khu vực phục vụ giao hàng<input name="serviceArea" placeholder="Ví dụ: Quận 1, Quận 3, TP. Hồ Chí Minh"></label>
+        <button type="submit">Lưu thông tin đối tác</button>
+      </form>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Cửa hàng</th><th>Đơn vị giao nhận</th><th>Phí giao hàng</th><th>Khu vực phục vụ</th><th>Thao tác</th></tr></thead>
+          <tbody id="partnerTable"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/admin.js"></script>
+</body>
+</html>

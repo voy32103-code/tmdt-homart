@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HomeMart - Hệ thống mua sắm đồ gia dụng thông minh</title>
+  <meta name="description" content="Sàn thương mại đồ gia dụng kết nối cửa hàng và đơn vị giao nhận uy tín.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">HomeMart</a>
+    <nav>
+      <a href="/">Cửa hàng</a>
+      <a href="#" id="viewHistoryLink">Lịch sử đơn hàng</a>
+      <a href="/admin.html">Quản trị</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-content">
+        <span class="badge">Sàn thương mại đồ gia dụng</span>
+        <h1>Mua sắm nhà cửa gọn hơn, giao hàng rõ ràng hơn</h1>
+        <p>Kết nối nhiều cửa hàng uy tín với các đơn vị giao nhận phù hợp về chất lượng và chi phí.</p>
+      </div>
+      <div class="hero-image">
+        <img src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1200&q=80" alt="Kitchen Interior Design">
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <input id="searchInput" type="search" placeholder="Tìm sản phẩm, thương hiệu...">
+      <select id="categoryFilter" title="Lọc theo danh mục sản phẩm">
+        <option value="">Tất cả danh mục</option>
+      </select>
+    </section>
+
+    <section class="shop-layout">
+      <div id="productGrid" class="product-grid" aria-live="polite"></div>
+      <aside class="cart-panel">
+        <h2>Giỏ hàng</h2>
+        <div id="cartItems" class="cart-items"></div>
+        <div class="cart-totals">
+          <div class="cart-total-row">
+            <span>Tạm tính</span>
+            <span id="cartSubtotal">0 đ</span>
+          </div>
+          <div class="cart-total-row">
+            <span>Phí vận chuyển</span>
+            <span id="cartShipping">0 đ</span>
+          </div>
+          <div class="cart-total-row grand-total">
+            <span>Tổng cộng</span>
+            <strong id="cartGrandTotal">0 đ</strong>
+          </div>
+        </div>
+        <form id="checkoutForm" class="checkout-form">
+          <label>Họ và tên<input name="fullName" required placeholder="Nhập họ và tên của bạn"></label>
+          <label>Số điện thoại<input name="phone" required placeholder="Nhập số điện thoại liên hệ"></label>
+          <label>Địa chỉ email<input name="email" type="email" placeholder="Nhập địa chỉ email (không bắt buộc)"></label>
+          <label>Địa chỉ giao hàng<input name="address" required placeholder="Nhập địa chỉ giao hàng chi tiết"></label>
+          <label>Đơn vị giao nhận<select name="logisticsCompanyId" required></select></label>
+          <button type="submit">Đặt hàng</button>
+        </form>
+        <p id="checkoutMessage" class="muted"></p>
+      </aside>
+    </section>
+  </main>
+
+  <!-- Modal Lịch sử đơn hàng -->
+  <div id="historyModal" class="modal-overlay">
+    <div class="modal-container">
+      <button class="modal-close" onclick="closeModal('historyModal')">&times;</button>
+      <h2 class="modal-title">Lịch sử mua hàng</h2>
+      <form id="historySearchForm" class="history-search-form">
+        <input type="text" id="historyPhoneInput" required placeholder="Nhập số điện thoại mua hàng...">
+        <button type="submit">Tra cứu</button>
+      </form>
+      <div id="historyResults" class="orders-history-list">
+        <p class="comments-empty">Nhập số điện thoại để tra cứu các đơn hàng đã đặt.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Bình luận sản phẩm -->
+  <div id="commentsModal" class="modal-overlay">
+    <div class="modal-container">
+      <button class="modal-close" onclick="closeModal('commentsModal')">&times;</button>
+      <h2 class="modal-title" id="commentsModalTitle">Bình luận sản phẩm</h2>
+      <div id="commentsList" class="comments-list">
+        <p class="comments-empty">Chưa có bình luận nào cho sản phẩm này.</p>
+      </div>
+      <form id="commentForm" class="comment-form">
+        <h3 class="comment-form-title">Viết bình luận mới</h3>
+        <div class="comment-form-grid">
+          <label class="comment-form-label">
+            Họ và tên
+            <input type="text" id="commentAuthorInput" required placeholder="Họ và tên của bạn...">
+          </label>
+          <label class="comment-form-label">
+            Đánh giá sao
+            <select id="commentRatingSelect" required>
+              <option value="5">⭐⭐⭐⭐⭐ (5 - Rất tốt)</option>
+              <option value="4">⭐⭐⭐⭐ (4 - Tốt)</option>
+              <option value="3">⭐⭐⭐ (3 - Bình thường)</option>
+              <option value="2">⭐⭐ (2 - Chưa tốt)</option>
+              <option value="1">⭐ (1 - Rất tệ)</option>
+            </select>
+          </label>
+        </div>
+        <label class="comment-form-label">
+          Nội dung bình luận
+          <textarea id="commentContentInput" required placeholder="Nhập cảm nhận của bạn về sản phẩm..." rows="3"></textarea>
+        </label>
+        <button type="submit" class="comment-form-submit">Gửi bình luận</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Floating Chatbot Widget -->
+  <div id="chatbotWidget" class="chatbot-widget">
+    <button id="chatbotToggleBtn" class="chatbot-toggle-btn" aria-label="Mở chat tư vấn">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    
+    <div id="chatbotPanel" class="chatbot-panel hidden">
+      <div class="chatbot-header">
+        <div class="chatbot-info">
+          <span class="chatbot-status-dot"></span>
+          <div>
+            <h4>Trợ lý AI HomeMart</h4>
+            <p>Hỗ trợ mua sắm 24/7</p>
+          </div>
+        </div>
+        <button id="chatbotCloseBtn" class="chatbot-close-btn" aria-label="Đóng chat">✕</button>
+      </div>
+      
+      <div id="chatbotMessages" class="chatbot-messages">
+        <div class="chatbot-message bot">
+          <p>Xin chào! Tôi có thể giúp gì cho bạn hôm nay? Bạn có thể hỏi tôi thông tin chi tiết về các sản phẩm đồ gia dụng có sẵn tại HomeMart.</p>
+        </div>
+      </div>
+      
+      <form id="chatbotForm" class="chatbot-input-area">
+        <input type="text" id="chatbotInput" placeholder="Nhập câu hỏi của bạn..." autocomplete="off" required>
+        <button type="submit" id="chatbotSendBtn" aria-label="Gửi">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/shop.js"></script>
+  <script src="/chatbot.js"></script>
+</body>
+</html>
