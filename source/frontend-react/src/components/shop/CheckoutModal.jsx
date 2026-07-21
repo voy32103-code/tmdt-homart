@@ -13,7 +13,8 @@ export function CheckoutModal({ isOpen, onClose, logisticsCompanies, onSuccess }
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
   const [logisticsCompanyId, setLogisticsCompanyId] = useState(logisticsCompanies[0] ? String(logisticsCompanies[0].id) : '');
-  const [paymentMethod, setPaymentMethod] = useState('COD'); // 'COD' | 'VNPAY'
+  const [paymentMethod, setPaymentMethod] = useState('VNPAY'); // Mặc định VNPAY
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 

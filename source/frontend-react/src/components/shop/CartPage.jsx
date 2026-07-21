@@ -236,9 +236,12 @@ export function CartPage({ onContinueShopping, onOpenCheckout }) {
                 type="button"
                 onClick={onOpenCheckout}
                 className="btn-checkout-primary"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               >
-                Tiến hành Đặt hàng ➔
+                <span>💳 Thanh toán VNPAY ngay</span>
+                <span>➔</span>
               </button>
+
             </div>
 
             {/* Trust Badges */}
