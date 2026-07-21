@@ -114,23 +114,33 @@ export default function App() {
         {(productsLoading || categoriesLoading) ? (
           <LoadingSpinner text="Đang nạp danh sách sản phẩm gia dụng..." />
         ) : (
-          <ProductGrid
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            products={products}
-            onAddToCart={addToCart}
-            onViewDetail={(p) => setDetailProduct(p)}
-            onOpenComment={(p) => setCommentProduct(p)}
-          />
+          <div className="shop-layout">
+            <div className="shop-main">
+              <ProductGrid
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                products={products}
+                onAddToCart={addToCart}
+                onViewDetail={(p) => setDetailProduct(p)}
+                onOpenComment={(p) => setCommentProduct(p)}
+              />
+            </div>
+            <aside className="shop-sidebar">
+              <CartPanel
+                isEmbedded={true}
+                onOpenCheckout={() => setIsCheckoutOpen(true)}
+              />
+            </aside>
+          </div>
         )}
       </main>
 
       <Footer />
 
-      {/* Side-Drawer Cart */}
+      {/* Side-Drawer Cart (Dành cho Mobile hoặc khi bấm nút Giỏ hàng trên Header) */}
       <CartPanel
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
@@ -139,6 +149,7 @@ export default function App() {
           setIsCheckoutOpen(true);
         }}
       />
+
 
       {/* Modals */}
       <CheckoutModal

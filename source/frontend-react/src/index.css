@@ -286,9 +286,37 @@ button:active {
 
 .shop-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 380px;
+  grid-template-columns: minmax(0, 1fr) 360px;
   gap: 24px;
+  align-items: start;
 }
+
+@media (max-width: 1024px) {
+  .shop-layout {
+    grid-template-columns: 1fr;
+  }
+  .shop-sidebar {
+    display: none;
+  }
+}
+
+.shop-sidebar {
+  position: sticky;
+  top: 90px;
+  align-self: start;
+}
+
+.cart-embedded-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 
 .product-grid {
   display: grid;
