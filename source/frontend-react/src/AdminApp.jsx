@@ -87,74 +87,126 @@ export default function AdminApp() {
 
   if (!token) {
     return (
-      <div>
-        <header className="site-header">
-          <a className="brand" href="/">HomeMart Admin</a>
+      <div className="admin-login-wrapper">
+        <header className="site-header admin-site-header">
+          <a className="brand" href="/">
+            <span className="brand-icon">⚡</span>
+            <span>HomeMart Portal</span>
+          </a>
           <nav>
-            <a href="/">Cửa hàng</a>
+            <a href="/" className="nav-button btn-store-link">🏪 Xem Cửa hàng</a>
           </nav>
         </header>
-        <main className="login-panel" style={{ display: 'flex', justifyContent: 'center', padding: '60px 16px' }}>
-          <form className="stack-form login-form card" onSubmit={handleLogin} style={{ maxWidth: '400px', width: '100%', padding: '24px' }}>
-            <h2>Đăng nhập Hệ thống Quản trị</h2>
-            {loginMsg && <p style={{ color: 'var(--accent)' }}>{loginMsg}</p>}
-            <label>Tài khoản
-              <input required value={username} onChange={(e) => setUsername(e.target.value)} />
-            </label>
-            <label>Mật khẩu
-              <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-            </label>
-            <button type="submit" style={{ marginTop: '12px' }}>Đăng nhập ngay</button>
-          </form>
+
+        <main className="login-panel">
+          <div className="login-card-container">
+            <div className="login-card-header">
+              <div className="login-logo-icon">⚡</div>
+              <h2>Đăng nhập Portal Quản trị</h2>
+              <p>Hệ thống Quản lý Bán hàng & Logistics Gia dụng</p>
+            </div>
+
+            <form className="stack-form login-form" onSubmit={handleLogin}>
+              {loginMsg && <div className="login-error-alert">⚠️ {loginMsg}</div>}
+              
+              <div className="form-group">
+                <label>Tài khoản Quản trị</label>
+                <input
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Nhập tên đăng nhập"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Mật khẩu</label>
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Nhập mật khẩu"
+                />
+              </div>
+
+              <button type="submit" className="btn-login-submit">
+                Đăng nhập ngay ➔
+              </button>
+
+              <div className="login-footer-note">
+                🔒 Kết nối được bảo mật 256-bit SSL | HomeMart Admin System
+              </div>
+            </form>
+          </div>
         </main>
       </div>
     );
   }
 
+  const tabs = [
+    { id: 'reports', label: 'Báo cáo doanh thu', icon: '📊' },
+    { id: 'categories', label: 'Danh mục', icon: '📁' },
+    { id: 'products', label: 'Sản phẩm', icon: '📦' },
+    { id: 'prices', label: 'Giá & Khuyến mại', icon: '🏷️' },
+    { id: 'orders', label: 'Đơn hàng', icon: '🛒' },
+    { id: 'logistics', label: 'Giao nhận', icon: '🚚' },
+    { id: 'partners', label: 'Đối tác liên kết', icon: '🤝' },
+    { id: 'comments', label: 'Bình luận', icon: '💬' }
+  ];
+
   return (
     <div className="admin-layout">
       <AdminHeader />
 
-      <main className="container main-content" style={{ minHeight: '80vh', padding: '24px 16px' }}>
+      <main className="container main-content admin-main-content">
         <SummaryCards summaryCounts={summaryCounts} />
 
-        <div className="admin-tabs" style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px', margin: '20px 0' }}>
-          {[
-            { id: 'reports', label: 'Báo cáo doanh thu' },
-            { id: 'categories', label: 'Danh mục' },
-            { id: 'products', label: 'Sản phẩm' },
-            { id: 'prices', label: 'Giá & Khuyến mại' },
-            { id: 'orders', label: 'Đơn hàng' },
-            { id: 'logistics', label: 'Giao nhận' },
-            { id: 'partners', label: 'Đối tác liên kết' },
-            { id: 'comments', label: 'Bình luận' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              type="button"
-              className={`admin-tab ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Tab Navigation */}
+        <div className="admin-tabs-bar">
+          <div className="admin-tabs-scroll">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                type="button"
+                className={`admin-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <span className="tab-icon">{tab.icon}</span>
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {loading && <LoadingSpinner text="Đang nạp dữ liệu quản trị..." />}
 
         {!loading && (
-          <>
+          <div className="admin-tab-content">
             {activeTab === 'reports' && (
               <section className="admin-section">
-                <div className="report-filters card" style={{ padding: '16px', marginBottom: '20px' }}>
-                  <div className="form-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr)) auto', alignItems: 'flex-end', gap: '16px' }}>
-                    <label>Từ ngày
-                      <input type="date" value={reportFromDate} onChange={(e) => setReportFromDate(e.target.value)} />
-                    </label>
-                    <label>Đến ngày
-                      <input type="date" value={reportToDate} onChange={(e) => setReportToDate(e.target.value)} />
-                    </label>
-                    <button type="button" onClick={fetchReports} style={{ width: 'auto' }}>Lọc dữ liệu</button>
+                <div className="report-filters-card">
+                  <h3 className="filter-title">📅 Bộ lọc Báo cáo theo Thời gian</h3>
+                  <div className="filter-grid">
+                    <div className="filter-item">
+                      <label>Từ ngày</label>
+                      <input
+                        type="date"
+                        value={reportFromDate}
+                        onChange={(e) => setReportFromDate(e.target.value)}
+                      />
+                    </div>
+                    <div className="filter-item">
+                      <label>Đến ngày</label>
+                      <input
+                        type="date"
+                        value={reportToDate}
+                        onChange={(e) => setReportToDate(e.target.value)}
+                      />
+                    </div>
+                    <button type="button" onClick={fetchReports} className="btn-filter-submit">
+                      🔍 Lọc dữ liệu
+                    </button>
                   </div>
                 </div>
 
@@ -200,7 +252,7 @@ export default function AdminApp() {
             {activeTab === 'comments' && (
               <CommentManager />
             )}
-          </>
+          </div>
         )}
       </main>
     </div>
