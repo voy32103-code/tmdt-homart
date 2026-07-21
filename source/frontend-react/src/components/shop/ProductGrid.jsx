@@ -1,0 +1,66 @@
+import React from 'react';
+import { ProductCard } from './ProductCard';
+
+export function ProductGrid({
+  categories,
+  selectedCategory,
+  onSelectCategory,
+  searchQuery,
+  onSearchChange,
+  products,
+  onAddToCart,
+  onViewDetail,
+  onOpenComment
+}) {
+  return (
+    <section className="shop-section">
+      <div className="filter-bar">
+        <div className="search-input-wrap">
+          <input
+            type="text"
+            placeholder="Tìm kiếm sản phẩm gia dụng, mã SKU..."
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+          />
+        </div>
+        <div className="category-pills">
+          <button
+            className={`pill ${selectedCategory === 'all' ? 'active' : ''}`}
+            onClick={() => onSelectCategory('all')}
+            type="button"
+          >
+            Tất cả danh mục
+          </button>
+          {categories.map(cat => (
+            <button
+              key={cat.id}
+              className={`pill ${selectedCategory === String(cat.id) ? 'active' : ''}`}
+              onClick={() => onSelectCategory(String(cat.id))}
+              type="button"
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {products.length === 0 ? (
+        <div className="empty-state">
+          <p>Không tìm thấy sản phẩm nào phù hợp với yêu cầu tìm kiếm.</p>
+        </div>
+      ) : (
+        <div className="product-grid">
+          {products.map(product => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              onAddToCart={onAddToCart}
+              onViewDetail={onViewDetail}
+              onOpenComment={onOpenComment}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}

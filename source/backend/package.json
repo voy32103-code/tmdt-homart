@@ -14,7 +14,8 @@
     "msnodesqlv8": "^4.4.0",
     "mssql": "^11.0.1",
     "pg": "^8.22.0",
-    "prisma": "^5.22.0"
+    "prisma": "^5.22.0",
+    "zod": "^4.4.3"
   },
   "keywords": [
     "marketplace",
