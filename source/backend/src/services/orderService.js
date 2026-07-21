@@ -70,9 +70,26 @@ class OrderService {
 
       // 2. Shipping calculation
       let shippingFee = 30000;
-      if (logisticsCompanyId) {
-        const company = await tx.logisticsCompany.findUnique({ where: { id: Number(logisticsCompanyId) } });
-        if (company) shippingFee = Number(company.baseFee);
+      let resolvedLogisticsId = logisticsCompanyId ? Number(logisticsCompanyId) : null;
+
+      if (resolvedLogisticsId) {
+        const company = await tx.logisticsCompany.findUnique({ where: { id: resolvedLogisticsId } });
+        if (company) {
+          shippingFee = Number(company.baseFee);
+        } else {
+          resolvedLogisticsId = null;
+        }
+      }
+
+      // Nếu không có company hợp lệ, lấy company đầu tiên trong DB
+      if (!resolvedLogisticsId) {
+        const firstCompany = await tx.logisticsCompany.findFirst({ where: { status: 'active' } });
+        if (firstCompany) {
+          resolvedLogisticsId = firstCompany.id;
+          shippingFee = Number(firstCompany.baseFee);
+        } else {
+          throw new Error('Chưa có đơn vị vận chuyển nào trong hệ thống. Vui lòng liên hệ admin.');
+        }
       }
 
       // 3. Process items & check stock
@@ -80,6 +97,7 @@ class OrderService {
       let discountTotal = 0;
       const preparedItems = [];
       const now = new Date();
+      let resolvedStoreId = null;
 
       for (const item of items) {
         const product = await tx.product.findUnique({
@@ -122,6 +140,10 @@ class OrderService {
         subtotal += lineSubtotal;
         discountTotal += lineDiscount;
 
+        if (resolvedStoreId === null) {
+          resolvedStoreId = product.storeId;
+        }
+
         preparedItems.push({
           productId: product.id,
           quantity: item.quantity,
@@ -143,8 +165,8 @@ class OrderService {
       const newOrder = await tx.order.create({
         data: {
           customerId: customer.id,
-          storeId: 1,
-          logisticsCompanyId: logisticsCompanyId ? Number(logisticsCompanyId) : 1,
+          storeId: resolvedStoreId,
+          logisticsCompanyId: resolvedLogisticsId,
           orderCode,
           status: 'pending',
           shippingFee,
