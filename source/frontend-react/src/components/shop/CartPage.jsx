@@ -238,7 +238,7 @@ export function CartPage({ onContinueShopping, onOpenCheckout }) {
                   e.preventDefault();
                   e.stopPropagation();
                   if (typeof onOpenCheckout === 'function') {
-                    onOpenCheckout();
+                    setTimeout(() => onOpenCheckout(), 0);
                   }
                 }}
                 className="btn-checkout-primary"
