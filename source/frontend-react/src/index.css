@@ -1048,7 +1048,7 @@ tr:hover td {
   cursor: pointer;
   transition: all 0.2s ease;
   width: auto;
-  min-height: auto;
+  min-height: 0;
 }
 .cancel-btn:hover {
   background: var(--accent);
@@ -1393,7 +1393,7 @@ tr:hover td {
   white-space: nowrap;
   transition: all 0.2s ease;
   width: auto;
-  min-height: auto;
+  min-height: 0;
   display: inline-flex;
   align-items: center;
   gap: 8px;
