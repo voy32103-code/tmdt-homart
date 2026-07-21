@@ -15,7 +15,7 @@ class LogisticsRepository {
   }
 
   async findCompanyBySlug(slug) {
-    return prisma.logisticsCompany.findUnique({ where: { slug } });
+    return null;
   }
 
   async createCompany(data) {

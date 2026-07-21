@@ -1,9 +1,8 @@
 const prisma = require('../config/prisma');
 
 class ProductRepository {
-  async findAll({ categoryId, search, status = 'active' } = {}) {
+  async findAll({ categoryId, search } = {}) {
     const where = {};
-    if (status) where.status = status;
     if (categoryId) where.categoryId = Number(categoryId);
     if (search) {
       where.OR = [
@@ -17,8 +16,8 @@ class ProductRepository {
       where,
       include: {
         category: true,
-        prices: { orderBy: { startsAt: 'desc' } },
-        promotions: { orderBy: { startsAt: 'desc' } },
+        prices: { orderBy: { effectiveFrom: 'desc' } },
+        promotions: { orderBy: { startDate: 'desc' } },
         comments: { orderBy: { createdAt: 'desc' } }
       },
       orderBy: { id: 'asc' }
@@ -30,8 +29,8 @@ class ProductRepository {
       where: { id: Number(id) },
       include: {
         category: true,
-        prices: { orderBy: { startsAt: 'desc' } },
-        promotions: { orderBy: { startsAt: 'desc' } },
+        prices: { orderBy: { effectiveFrom: 'desc' } },
+        promotions: { orderBy: { startDate: 'desc' } },
         comments: { orderBy: { createdAt: 'desc' } }
       }
     });
@@ -61,13 +60,19 @@ class ProductRepository {
   }
 
   async createPriceHistory(data) {
-    return prisma.productPrice.create({ data });
+    return prisma.productPrice.create({
+      data: {
+        productId: Number(data.productId),
+        price: data.price,
+        effectiveFrom: data.effectiveFrom || data.startsAt || new Date()
+      }
+    });
   }
 
   async findPromotionsByProductId(productId) {
     return prisma.promotion.findMany({
       where: { productId: Number(productId) },
-      orderBy: { startsAt: 'desc' }
+      orderBy: { startDate: 'desc' }
     });
   }
 
@@ -95,15 +100,14 @@ class ProductRepository {
   async countActivePromotions(now = new Date()) {
     return prisma.promotion.count({
       where: {
-        status: 'active',
-        startsAt: { lte: now },
-        endsAt: { gte: now }
+        startDate: { lte: now },
+        endDate: { gte: now }
       }
     });
   }
 
   async countTotalProducts() {
-    return prisma.product.count({ where: { status: 'active' } });
+    return prisma.product.count();
   }
 }
 

@@ -10,7 +10,6 @@ const schemas = {
   category: z.object({
     name: z.string().trim().min(1, 'Tên danh mục không được để trống'),
     slug: z.string().optional(),
-    sortOrder: z.number().int().optional().default(0),
     seoTitle: z.string().optional().nullable(),
     seoDescription: z.string().optional().nullable(),
     parentId: z.number().int().optional().nullable()
@@ -33,7 +32,8 @@ const schemas = {
   productPrice: z.object({
     productId: z.number().int().positive('Sản phẩm không hợp lệ'),
     price: z.number().min(0, 'Giá không hợp lệ'),
-    startsAt: z.string().min(1, 'Ngày bắt đầu không được để trống'),
+    startsAt: z.string().optional(),
+    effectiveFrom: z.string().optional(),
     note: z.string().optional().nullable()
   }),
 
@@ -42,9 +42,11 @@ const schemas = {
     name: z.string().trim().min(1, 'Tên chương trình không được để trống'),
     discountType: z.enum(['percent', 'amount']),
     discountValue: z.number().positive('Mức giảm giá phải lớn hơn 0'),
-    startsAt: z.string().min(1, 'Ngày bắt đầu không được để trống'),
-    endsAt: z.string().min(1, 'Ngày kết thúc không được để trống'),
-    status: z.enum(['active', 'inactive']).default('active')
+    startsAt: z.string().optional(),
+    startDate: z.string().optional(),
+    endsAt: z.string().optional(),
+    endDate: z.string().optional(),
+    status: z.enum(['active', 'inactive']).optional().default('active')
   }),
 
   order: z.object({
@@ -64,18 +66,21 @@ const schemas = {
     slug: z.string().optional(),
     phone: z.string().optional().nullable(),
     baseFee: z.number().min(0).default(0),
-    rating: z.number().min(0).max(5).default(5),
-    status: z.enum(['active', 'inactive']).default('active')
+    area: z.string().optional().nullable(),
+    serviceArea: z.string().optional().nullable(),
+    rating: z.number().min(0).max(5).optional().default(5),
+    status: z.enum(['active', 'inactive']).optional().default('active')
   }),
 
   storeLogisticsPartner: z.object({
-    storeId: z.number().int().positive().default(1),
+    storeId: z.number().int().positive().optional().default(1),
     logisticsCompanyId: z.number().int().positive('Vui lòng chọn công ty giao nhận'),
-    baseFee: z.number().min(0).default(0),
-    feePerKm: z.number().min(0).default(0),
+    baseFee: z.number().min(0).optional().default(0),
+    customFee: z.number().min(0).optional().default(0),
+    feePerKm: z.number().min(0).optional().default(0),
     serviceArea: z.string().optional().nullable(),
-    rating: z.number().min(0).max(5).default(5),
-    status: z.enum(['active', 'inactive']).default('active')
+    rating: z.number().min(0).max(5).optional().default(5),
+    status: z.enum(['active', 'inactive']).optional().default('active')
   }),
 
   comment: z.object({

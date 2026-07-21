@@ -6,14 +6,14 @@ class ProductService {
     const promotions = item.promotions || [];
     const comments = item.comments || [];
 
-    const basePrice = prices.length > 0 ? Number(prices[0].price) : 0;
+    const basePrice = Number(item.price !== undefined ? item.price : (prices[0] ? prices[0].price : 0));
     const now = new Date();
 
-    const activePromo = promotions.find(p =>
-      p.status === 'active' &&
-      new Date(p.startsAt) <= now &&
-      new Date(p.endsAt) >= now
-    );
+    const activePromo = promotions.find(p => {
+      const s = new Date(p.startDate || p.startsAt);
+      const e = new Date(p.endDate || p.endsAt);
+      return s <= now && e >= now;
+    });
 
     let finalPrice = basePrice;
     let discountText = '';
@@ -45,15 +45,20 @@ class ProductService {
       discountText,
       hasDiscount: !!activePromo,
       stockQuantity: item.stockQuantity,
-      status: item.status,
       imageUrl: item.imageUrl || 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=600&q=80',
       shortDescription: item.shortDescription || '',
-      description: item.description || '',
       seoTitle: item.seoTitle || '',
       seoDescription: item.seoDescription || '',
       averageRating: avgRating,
+      avgRating,
       commentCount: comments.length,
-      createdAt: item.createdAt
+      createdAt: item.createdAt,
+      promotion: activePromo ? {
+        id: activePromo.id,
+        name: activePromo.name,
+        discountType: activePromo.discountType,
+        discountValue: Number(activePromo.discountValue)
+      } : null
     };
   }
 
@@ -81,10 +86,10 @@ class ProductService {
       slug: slug || `prod-${Date.now()}`,
       sku: data.sku,
       brand: data.brand || null,
+      price: Number(data.price || 0),
       stockQuantity: Number(data.stockQuantity || 0),
       imageUrl: data.imageUrl || null,
-      shortDescription: data.shortDescription || null,
-      description: data.description || null,
+      shortDescription: data.shortDescription || data.description || null,
       seoTitle: data.seoTitle || null,
       seoDescription: data.seoDescription || null
     });
@@ -93,8 +98,7 @@ class ProductService {
       await productRepo.createPriceHistory({
         productId: newProduct.id,
         price: Number(data.price),
-        startsAt: new Date(),
-        note: 'Khởi tạo giá khi tạo sản phẩm'
+        effectiveFrom: new Date()
       });
     }
 
@@ -115,19 +119,19 @@ class ProductService {
       sku: data.sku !== undefined ? data.sku : product.sku,
       categoryId: data.categoryId ? Number(data.categoryId) : product.categoryId,
       brand: data.brand !== undefined ? data.brand : product.brand,
+      price: data.price !== undefined ? Number(data.price) : product.price,
       stockQuantity: data.stockQuantity !== undefined ? Number(data.stockQuantity) : product.stockQuantity,
       imageUrl: data.imageUrl !== undefined ? data.imageUrl : product.imageUrl,
-      shortDescription: data.shortDescription !== undefined ? data.shortDescription : product.shortDescription,
+      shortDescription: data.shortDescription !== undefined ? data.shortDescription : (data.description !== undefined ? data.description : product.shortDescription),
       seoTitle: data.seoTitle !== undefined ? data.seoTitle : product.seoTitle,
       seoDescription: data.seoDescription !== undefined ? data.seoDescription : product.seoDescription
     });
 
-    if (data.price !== undefined && Number(data.price) !== (product.prices[0] ? Number(product.prices[0].price) : 0)) {
+    if (data.price !== undefined && Number(data.price) !== Number(product.price)) {
       await productRepo.createPriceHistory({
         productId: id,
         price: Number(data.price),
-        startsAt: new Date(),
-        note: 'Cập nhật giá qua bảng quản trị'
+        effectiveFrom: new Date()
       });
     }
 
@@ -141,13 +145,12 @@ class ProductService {
     return { success: true, message: 'Đã xóa sản phẩm thành công' };
   }
 
-  async addPriceHistory({ productId, price, startsAt, note }) {
+  async addPriceHistory({ productId, price, startsAt, effectiveFrom }) {
     await this.getProductById(productId);
     const newPrice = await productRepo.createPriceHistory({
       productId: Number(productId),
       price: Number(price),
-      startsAt: startsAt ? new Date(startsAt) : new Date(),
-      note: note || null
+      effectiveFrom: effectiveFrom ? new Date(effectiveFrom) : (startsAt ? new Date(startsAt) : new Date())
     });
     return newPrice;
   }

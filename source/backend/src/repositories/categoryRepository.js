@@ -6,10 +6,7 @@ class CategoryRepository {
     if (status) where.status = status;
     return prisma.category.findMany({
       where,
-      orderBy: [
-        { sortOrder: 'asc' },
-        { id: 'asc' }
-      ]
+      orderBy: { id: 'asc' }
     });
   }
 

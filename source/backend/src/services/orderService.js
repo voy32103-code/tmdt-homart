@@ -1,7 +1,5 @@
 const prisma = require('../config/prisma');
 const orderRepo = require('../repositories/orderRepository');
-const productRepo = require('../repositories/productRepository');
-const logisticsRepo = require('../repositories/logisticsRepository');
 
 class OrderService {
   async getAllOrders(filters) {
@@ -21,6 +19,10 @@ class OrderService {
   }
 
   formatOrder(o) {
+    const shippingFee = Number(o.shippingFee || 0);
+    const grandTotal = Number(o.grandTotal || 0);
+    const subtotal = grandTotal > shippingFee ? grandTotal - shippingFee : grandTotal;
+
     return {
       id: o.id,
       orderCode: o.orderCode,
@@ -30,19 +32,19 @@ class OrderService {
       customerEmail: o.customer ? o.customer.email || '' : '',
       customerAddress: o.customer ? o.customer.address || '' : '',
       logisticsName: o.logisticsCompany ? o.logisticsCompany.name : '',
-      subtotal: Number(o.subtotal),
-      discountTotal: Number(o.discountTotal),
-      shippingFee: Number(o.shippingFee),
-      grandTotal: Number(o.grandTotal),
+      subtotal,
+      discountTotal: 0,
+      shippingFee,
+      grandTotal,
       createdAt: o.createdAt,
       items: (o.items || []).map(item => ({
         id: item.id,
         productId: item.productId,
         productName: item.product ? item.product.name : '',
         quantity: item.quantity,
-        unitPrice: Number(item.unitPrice),
-        discountAmount: Number(item.discountAmount),
-        lineTotal: Number(item.lineTotal)
+        unitPrice: Number(item.price || 0),
+        discountAmount: 0,
+        lineTotal: Number(item.lineTotal || 0)
       }))
     };
   }
@@ -83,8 +85,8 @@ class OrderService {
         const product = await tx.product.findUnique({
           where: { id: Number(item.productId) },
           include: {
-            prices: { orderBy: { startsAt: 'desc' } },
-            promotions: { orderBy: { startsAt: 'desc' } }
+            prices: { orderBy: { effectiveFrom: 'desc' } },
+            promotions: { orderBy: { startDate: 'desc' } }
           }
         });
 
@@ -96,13 +98,13 @@ class OrderService {
           throw new Error(`Sản phẩm "${product.name}" chỉ còn ${product.stockQuantity} mặt hàng trong kho`);
         }
 
-        const unitPrice = product.prices.length > 0 ? Number(product.prices[0].price) : 0;
+        const unitPrice = Number(product.price !== undefined ? product.price : (product.prices[0] ? product.prices[0].price : 0));
 
-        const activePromo = product.promotions.find(p =>
-          p.status === 'active' &&
-          new Date(p.startsAt) <= now &&
-          new Date(p.endsAt) >= now
-        );
+        const activePromo = product.promotions.find(p => {
+          const s = new Date(p.startDate);
+          const e = new Date(p.endDate);
+          return s <= now && e >= now;
+        });
 
         let discountPerUnit = 0;
         if (activePromo) {
@@ -115,7 +117,7 @@ class OrderService {
 
         const lineSubtotal = unitPrice * item.quantity;
         const lineDiscount = discountPerUnit * item.quantity;
-        const lineTotal = lineSubtotal - lineDiscount;
+        const lineTotal = Math.max(0, lineSubtotal - lineDiscount);
 
         subtotal += lineSubtotal;
         discountTotal += lineDiscount;
@@ -123,8 +125,7 @@ class OrderService {
         preparedItems.push({
           productId: product.id,
           quantity: item.quantity,
-          unitPrice,
-          discountAmount: discountPerUnit,
+          price: unitPrice,
           lineTotal
         });
 
@@ -135,7 +136,7 @@ class OrderService {
         });
       }
 
-      const grandTotal = subtotal - discountTotal + shippingFee;
+      const grandTotal = Math.max(0, subtotal - discountTotal) + shippingFee;
       const orderCode = `HM-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
 
       // 4. Create Order
@@ -146,8 +147,6 @@ class OrderService {
           logisticsCompanyId: logisticsCompanyId ? Number(logisticsCompanyId) : 1,
           orderCode,
           status: 'pending',
-          subtotal,
-          discountTotal,
           shippingFee,
           grandTotal,
           items: {
