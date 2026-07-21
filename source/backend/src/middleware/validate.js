@@ -52,12 +52,12 @@ const schemas = {
   order: z.object({
     customerName: z.string().trim().min(1, 'Họ tên khách hàng không được để trống'),
     customerPhone: z.string().trim().min(1, 'Số điện thoại không được để trống'),
-    customerEmail: z.string().email('Email không hợp lệ').optional().or(z.literal('')),
+    customerEmail: z.string().email('Email không hợp lệ').optional().or(z.literal('')).or(z.undefined()),
     customerAddress: z.string().trim().min(1, 'Địa chỉ giao hàng không được để trống'),
-    logisticsCompanyId: z.number().int().positive().optional().nullable(),
+    logisticsCompanyId: z.coerce.number().int().positive().optional().nullable(),
     items: z.array(z.object({
-      productId: z.number().int().positive('Mã sản phẩm không hợp lệ'),
-      quantity: z.number().int().positive('Số lượng phải lớn hơn 0')
+      productId: z.coerce.number().int().positive('Mã sản phẩm không hợp lệ'),
+      quantity: z.coerce.number().int().positive('Số lượng phải lớn hơn 0')
     })).min(1, 'Giỏ hàng không được để trống')
   }),
 

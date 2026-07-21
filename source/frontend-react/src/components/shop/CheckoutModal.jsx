@@ -39,8 +39,8 @@ export function CheckoutModal({ isOpen, onClose, logisticsCompanies, onSuccess }
         customerAddress,
         logisticsCompanyId: logisticsCompanyId ? Number(logisticsCompanyId) : undefined,
         items: cart.map(item => ({
-          productId: item.productId,
-          quantity: item.quantity
+          productId: Number(item.productId),
+          quantity: Number(item.quantity)
         }))
       };
 
