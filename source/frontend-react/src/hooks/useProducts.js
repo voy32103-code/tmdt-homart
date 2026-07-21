@@ -18,9 +18,10 @@ export function useProducts(selectedCategory = 'all', searchQuery = '') {
         params.search = searchQuery;
       }
       const data = await productApi.getAll(params);
-      setProducts(data);
+      setProducts(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err.message);
+      setProducts([]);
     } finally {
       setLoading(false);
     }

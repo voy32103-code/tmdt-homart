@@ -11,9 +11,10 @@ export function useCategories() {
     setError(null);
     try {
       const data = await categoryApi.getAll();
-      setCategories(data);
+      setCategories(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err.message);
+      setCategories([]);
     } finally {
       setLoading(false);
     }

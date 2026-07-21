@@ -2,16 +2,19 @@ import React from 'react';
 import { ProductCard } from './ProductCard';
 
 export function ProductGrid({
-  categories,
+  categories = [],
   selectedCategory,
   onSelectCategory,
   searchQuery,
   onSearchChange,
-  products,
+  products = [],
   onAddToCart,
   onViewDetail,
   onOpenComment
 }) {
+  const categoryList = Array.isArray(categories) ? categories : [];
+  const productList = Array.isArray(products) ? products : [];
+
   return (
     <section className="shop-section">
       <div className="filter-bar card">
@@ -44,7 +47,7 @@ export function ProductGrid({
             aria-label="Chọn danh mục sản phẩm"
           >
             <option value="all">-- Tất cả danh mục gia dụng --</option>
-            {categories.map(cat => (
+            {categoryList.map(cat => (
               <option key={cat.id} value={String(cat.id)}>
                 {cat.name}
               </option>
@@ -54,7 +57,7 @@ export function ProductGrid({
       </div>
 
       <div className="results-header">
-        <span className="results-count">Hiển thị {products.length} sản phẩm</span>
+        <span className="results-count">Hiển thị {productList.length} sản phẩm</span>
         {selectedCategory !== 'all' && (
           <button
             type="button"
@@ -66,7 +69,7 @@ export function ProductGrid({
         )}
       </div>
 
-      {products.length === 0 ? (
+      {productList.length === 0 ? (
         <div className="empty-state card">
           <span className="empty-icon">📦</span>
           <h3>Không tìm thấy sản phẩm nào</h3>
@@ -84,7 +87,7 @@ export function ProductGrid({
         </div>
       ) : (
         <div className="product-grid">
-          {products.map(product => (
+          {productList.map(product => (
             <ProductCard
               key={product.id}
               product={product}
