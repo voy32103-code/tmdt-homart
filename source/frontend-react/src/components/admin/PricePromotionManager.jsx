@@ -83,58 +83,89 @@ export function PricePromotionManager({ products, onRefresh }) {
   return (
     <section className="admin-section">
       <div className="section-title">
-        <h2>Giá sản phẩm & Khuyến mại</h2>
+        <h2>🏷️ Giá sản phẩm & Khuyến mại</h2>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '24px' }}>
+      <div className="admin-forms-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginBottom: '32px' }}>
         {/* Update Price Form */}
-        <form className="card form-grid" onSubmit={handleAddPrice} style={{ gap: '12px' }}>
-          <h3>Cập nhật giá bán</h3>
-          <label>Chọn sản phẩm
-            <select value={priceProdId} onChange={(e) => setPriceProdId(e.target.value)}>
-              {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          </label>
-          <label>Giá mới (VNĐ)
-            <input required type="number" value={priceVal} onChange={(e) => setPriceVal(e.target.value)} />
-          </label>
-          <label>Ghi chú lý do thay đổi
-            <input placeholder="VD: Điều chỉnh giá nhập nguyên liệu" value={priceNote} onChange={(e) => setPriceNote(e.target.value)} />
-          </label>
-          <button type="submit">Cập nhật giá mới</button>
-        </form>
+        <div className="form-card">
+          <h3 className="form-card-title">💰 Cập nhật giá bán</h3>
+          <form onSubmit={handleAddPrice} className="stack-form">
+            <div className="form-group">
+              <label>Chọn sản phẩm</label>
+              <select value={priceProdId} onChange={(e) => setPriceProdId(e.target.value)}>
+                {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Giá mới (VNĐ)</label>
+              <input required type="number" placeholder="Ví dụ: 1290000" value={priceVal} onChange={(e) => setPriceVal(e.target.value)} />
+            </div>
+
+            <div className="form-group">
+              <label>Ghi chú lý do thay đổi</label>
+              <input placeholder="Ví dụ: Điều chỉnh giá nhập nguyên liệu" value={priceNote} onChange={(e) => setPriceNote(e.target.value)} />
+            </div>
+
+            <button type="submit" className="btn-admin-submit">
+              Cập nhật giá mới
+            </button>
+          </form>
+        </div>
 
         {/* Create Promotion Form */}
-        <form className="card form-grid" onSubmit={handleAddPromotion} style={{ gap: '12px' }}>
-          <h3>Tạo khuyến mại</h3>
-          <label>Sản phẩm áp dụng
-            <select value={promoProdId} onChange={(e) => setPromoProdId(e.target.value)}>
-              {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          </label>
-          <label>Tên chương trình
-            <input required placeholder="VD: Khuyến mại Hè Rực Rỡ" value={promoName} onChange={(e) => setPromoName(e.target.value)} />
-          </label>
-          <label>Loại giảm giá
-            <select value={promoType} onChange={(e) => setPromoType(e.target.value)}>
-              <option value="percent">Phần trăm (%)</option>
-              <option value="fixed">Số tiền cố định (VNĐ)</option>
-            </select>
-          </label>
-          <label>Giá trị giảm
-            <input required type="number" value={promoVal} onChange={(e) => setPromoVal(e.target.value)} />
-          </label>
-          <label>Ngày bắt đầu
-            <input required type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
-          </label>
-          <label>Ngày kết thúc
-            <input required type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
-          </label>
-          <button type="submit">Lưu chương trình KM</button>
-        </form>
+        <div className="form-card">
+          <h3 className="form-card-title">🔥 Tạo chương trình khuyến mại</h3>
+          <form onSubmit={handleAddPromotion} className="stack-form">
+            <div className="form-row-2">
+              <div className="form-group">
+                <label>Sản phẩm áp dụng</label>
+                <select value={promoProdId} onChange={(e) => setPromoProdId(e.target.value)}>
+                  {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Tên chương trình</label>
+                <input required placeholder="VD: Khuyến mại Hè Rực Rỡ" value={promoName} onChange={(e) => setPromoName(e.target.value)} />
+              </div>
+            </div>
+
+            <div className="form-row-2">
+              <div className="form-group">
+                <label>Loại giảm giá</label>
+                <select value={promoType} onChange={(e) => setPromoType(e.target.value)}>
+                  <option value="percent">Phần trăm (%)</option>
+                  <option value="fixed">Số tiền cố định (VNĐ)</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Giá trị giảm</label>
+                <input required type="number" placeholder="VD: 10" value={promoVal} onChange={(e) => setPromoVal(e.target.value)} />
+              </div>
+            </div>
+
+            <div className="form-row-2">
+              <div className="form-group">
+                <label>Ngày bắt đầu</label>
+                <input required type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>Ngày kết thúc</label>
+                <input required type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
+              </div>
+            </div>
+
+            <button type="submit" className="btn-admin-submit">
+              Lưu chương trình KM
+            </button>
+          </form>
+        </div>
       </div>
 
-      <h3>Danh sách khuyến mại đang có</h3>
+      <div className="section-title">
+        <h3>Danh sách khuyến mại đang có</h3>
+      </div>
       <div className="table-wrap">
         <table>
           <thead>
@@ -152,14 +183,18 @@ export function PricePromotionManager({ products, onRefresh }) {
           <tbody>
             {promotions.map(item => (
               <tr key={item.id}>
-                <td>{item.id}</td>
-                <td>{item.name}</td>
-                <td>{item.discountType === 'percent' ? '%' : 'VNĐ'}</td>
-                <td>{item.discountValue}</td>
+                <td><strong>#{item.id}</strong></td>
+                <td><strong>{item.name}</strong></td>
+                <td>{item.discountType === 'percent' ? 'Phần trăm (%)' : 'Cố định (VNĐ)'}</td>
+                <td><strong>{item.discountValue} {item.discountType === 'percent' ? '%' : '₫'}</strong></td>
                 <td>{new Date(item.startsAt).toLocaleString('vi-VN')}</td>
                 <td>{new Date(item.endsAt).toLocaleString('vi-VN')}</td>
-                <td><span className={`status-badge status-${item.status}`}>{item.status}</span></td>
                 <td>
+                  <span className={`status-badge status-${item.status}`}>
+                    {item.status === 'active' ? '● Đang diễn ra' : item.status}
+                  </span>
+                </td>
+                <td className="row-actions">
                   <button type="button" className="danger" onClick={() => handleDeletePromo(item.id)}>Xóa</button>
                 </td>
               </tr>
