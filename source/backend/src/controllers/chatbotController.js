@@ -1,9 +1,5 @@
 const prisma = require('../config/prisma');
-const { mapProduct } = require('./productController');
-
-function isBlank(value) {
-  return value === undefined || value === null || String(value).trim() === '';
-}
+const { mapProduct } = require('../services/productService');
 
 async function handleChatbot(req, res) {
   const { messages } = req.body;
@@ -12,14 +8,13 @@ async function handleChatbot(req, res) {
   }
 
   try {
-    // Fetch products using Prisma
+    // Fetch products using Prisma (Product model has no status field)
     const products = await prisma.product.findMany({
-      where: { status: 'active' },
       include: {
         category: true,
         store: true,
-        prices: true,
-        promotions: true,
+        prices: { orderBy: { effectiveFrom: 'desc' } },
+        promotions: { orderBy: { startDate: 'desc' } },
         comments: true
       }
     });
@@ -28,8 +23,8 @@ async function handleChatbot(req, res) {
 
     const catalogText = mappedProducts.map(p => {
       const priceText = p.finalPrice < p.price 
-        ? `${p.finalPrice} đ (Giảm giá từ ${p.price} đ - Khuyến mại: ${p.promotion ? p.promotion.name : ''})`
-        : `${p.price} đ`;
+        ? `${p.finalPrice.toLocaleString('vi-VN')} đ (Giảm giá từ ${p.price.toLocaleString('vi-VN')} đ - Khuyến mại: ${p.promotion ? p.promotion.name : ''})`
+        : `${p.price.toLocaleString('vi-VN')} đ`;
       return `- Tên: ${p.name}
   SKU: ${p.sku}
   Danh mục: ${p.categoryName}

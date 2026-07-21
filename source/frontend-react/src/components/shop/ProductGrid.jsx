@@ -35,29 +35,35 @@ export function ProductGrid({
           )}
         </div>
 
-        <div className="category-pills">
-          <button
-            className={`pill ${selectedCategory === 'all' ? 'active' : ''}`}
-            onClick={() => onSelectCategory('all')}
-            type="button"
+        <div className="category-select-wrap">
+          <span className="select-icon">🏷️</span>
+          <select
+            className="category-droplist"
+            value={selectedCategory}
+            onChange={(e) => onSelectCategory(e.target.value)}
+            aria-label="Chọn danh mục sản phẩm"
           >
-            Tất cả danh mục
-          </button>
-          {categories.map(cat => (
-            <button
-              key={cat.id}
-              className={`pill ${selectedCategory === String(cat.id) ? 'active' : ''}`}
-              onClick={() => onSelectCategory(String(cat.id))}
-              type="button"
-            >
-              {cat.name}
-            </button>
-          ))}
+            <option value="all">-- Tất cả danh mục gia dụng --</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={String(cat.id)}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
       <div className="results-header">
         <span className="results-count">Hiển thị {products.length} sản phẩm</span>
+        {selectedCategory !== 'all' && (
+          <button
+            type="button"
+            className="clear-category-tag"
+            onClick={() => onSelectCategory('all')}
+          >
+            Bỏ lọc danh mục ✕
+          </button>
+        )}
       </div>
 
       {products.length === 0 ? (
