@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal } from '../common/Modal';
 import { useCartStore } from '../../stores/cartStore';
 import { orderApi } from '../../api/orderApi';
+import { vnpayApi } from '../../api/vnpayApi';
 
 const money = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
 
@@ -12,6 +13,7 @@ export function CheckoutModal({ isOpen, onClose, logisticsCompanies, onSuccess }
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
   const [logisticsCompanyId, setLogisticsCompanyId] = useState(logisticsCompanies[0] ? String(logisticsCompanies[0].id) : '');
+  const [paymentMethod, setPaymentMethod] = useState('COD'); // 'COD' | 'VNPAY'
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -33,9 +35,31 @@ export function CheckoutModal({ isOpen, onClose, logisticsCompanies, onSuccess }
         }))
       };
 
-      const result = await orderApi.create(payload);
+      // 1. Tạo đơn hàng trong cơ sở dữ liệu
+      const order = await orderApi.create(payload);
+
+      // 2. Nếu chọn thanh toán VNPAY -> Gọi backend tạo URL thanh toán
+      if (paymentMethod === 'VNPAY') {
+        const vnpayRes = await vnpayApi.createPaymentUrl({
+          orderCode: order.orderCode,
+          amount: order.grandTotal,
+          orderInfo: `Thanh toan don hang ${order.orderCode}`
+        });
+
+        if (vnpayRes && vnpayRes.paymentUrl) {
+          clearCart();
+          onClose();
+          // Chuyển hướng người dùng sang Cổng thanh toán VNPAY Sandbox
+          window.location.href = vnpayRes.paymentUrl;
+          return;
+        } else {
+          throw new Error('Không thể tạo liên kết thanh toán VNPAY.');
+        }
+      }
+
+      // 3. Nếu là COD -> Thanh toán bình thường
       clearCart();
-      onSuccess(result);
+      onSuccess(order);
     } catch (err) {
       setErrorMsg(err.message);
     } finally {
@@ -44,7 +68,7 @@ export function CheckoutModal({ isOpen, onClose, logisticsCompanies, onSuccess }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Thông tin Đặt hàng">
+    <Modal isOpen={isOpen} onClose={onClose} title="Thông tin Đặt hàng & Thanh toán">
       <form className="stack-form" onSubmit={handleSubmit}>
         {errorMsg && <p style={{ color: 'var(--accent)', fontWeight: 600 }}>{errorMsg}</p>}
 
@@ -57,23 +81,25 @@ export function CheckoutModal({ isOpen, onClose, logisticsCompanies, onSuccess }
           />
         </label>
 
-        <label>Số điện thoại (*)
-          <input
-            required
-            placeholder="Nhập số điện thoại nhận hàng"
-            value={customerPhone}
-            onChange={(e) => setCustomerPhone(e.target.value)}
-          />
-        </label>
+        <div className="form-row-2">
+          <label>Số điện thoại (*)
+            <input
+              required
+              placeholder="Nhập số điện thoại nhận hàng"
+              value={customerPhone}
+              onChange={(e) => setCustomerPhone(e.target.value)}
+            />
+          </label>
 
-        <label>Email (Không bắt buộc)
-          <input
-            type="email"
-            placeholder="Nhập địa chỉ email"
-            value={customerEmail}
-            onChange={(e) => setCustomerEmail(e.target.value)}
-          />
-        </label>
+          <label>Email (Không bắt buộc)
+            <input
+              type="email"
+              placeholder="Nhập địa chỉ email"
+              value={customerEmail}
+              onChange={(e) => setCustomerEmail(e.target.value)}
+            />
+          </label>
+        </div>
 
         <label>Địa chỉ nhận hàng (*)
           <input
@@ -97,13 +123,71 @@ export function CheckoutModal({ isOpen, onClose, logisticsCompanies, onSuccess }
           </select>
         </label>
 
-        <div className="order-summary-box">
-          <p>Số lượng sản phẩm: <strong>{cart.reduce((s, i) => s + i.quantity, 0)}</strong></p>
-          <p>Tạm tính: <strong>{money.format(getTotalPrice())}</strong></p>
+        {/* Phương thức thanh toán */}
+        <div style={{ marginTop: '12px' }}>
+          <label style={{ fontWeight: 700, marginBottom: '8px', display: 'block' }}>
+            Phương thức thanh toán (*)
+          </label>
+          <div className="payment-methods-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <label className={`payment-option-card ${paymentMethod === 'COD' ? 'selected' : ''}`} style={{
+              border: paymentMethod === 'COD' ? '2px solid var(--primary)' : '1fr solid #cbd5e1',
+              background: paymentMethod === 'COD' ? '#ecfdf5' : '#ffffff',
+              padding: '12px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="COD"
+                checked={paymentMethod === 'COD'}
+                onChange={() => setPaymentMethod('COD')}
+              />
+              <div>
+                <strong>💵 COD</strong>
+                <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Thanh toán tiền mặt khi nhận hàng</p>
+              </div>
+            </label>
+
+            <label className={`payment-option-card ${paymentMethod === 'VNPAY' ? 'selected' : ''}`} style={{
+              border: paymentMethod === 'VNPAY' ? '2px solid #0284c7' : '1px solid #cbd5e1',
+              background: paymentMethod === 'VNPAY' ? '#f0f9ff' : '#ffffff',
+              padding: '12px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="VNPAY"
+                checked={paymentMethod === 'VNPAY'}
+                onChange={() => setPaymentMethod('VNPAY')}
+              />
+              <div>
+                <strong>💳 Cổng VNPAY</strong>
+                <p style={{ margin: 0, fontSize: '12px', color: '#0284c7' }}>Thẻ ATM, QR Code, VNPAY App</p>
+              </div>
+            </label>
+          </div>
         </div>
 
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Đang xử lý đơn hàng...' : 'Xác nhận Đặt hàng'}
+        <div className="order-summary-box" style={{ marginTop: '16px', background: '#f8fafc', padding: '14px', borderRadius: '8px' }}>
+          <p>Số lượng sản phẩm: <strong>{cart.reduce((s, i) => s + i.quantity, 0)}</strong></p>
+          <p>Tổng thanh toán: <strong style={{ color: 'var(--primary)', fontSize: '18px' }}>{money.format(getTotalPrice())}</strong></p>
+        </div>
+
+        <button type="submit" disabled={isSubmitting} className="btn-primary-admin" style={{ width: '100%', marginTop: '12px' }}>
+          {isSubmitting
+            ? 'Đang xử lý đơn hàng...'
+            : paymentMethod === 'VNPAY'
+            ? '🌐 Thanh toán qua VNPAY ➔'
+            : 'Xác nhận Đặt hàng (COD)'}
         </button>
       </form>
     </Modal>

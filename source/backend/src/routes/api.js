@@ -12,8 +12,10 @@ const promotionController = require('../controllers/promotionController');
 const orderController = require('../controllers/orderController');
 const reportController = require('../controllers/reportController');
 const chatbotController = require('../controllers/chatbotController');
+const vnpayController = require('../controllers/vnpayController');
 
 // Auth routes
+
 router.post('/auth/login', validate('login'), authController.login);
 router.post('/auth/logout', authController.logout);
 
@@ -79,4 +81,9 @@ router.get('/admin/reports/top-products', requireAdmin, reportController.getTopP
 router.get('/admin/reports/revenue-by-category', requireAdmin, reportController.getRevenueByCategory);
 router.get('/admin/reports/order-status-summary', requireAdmin, reportController.getOrderStatusSummary);
 
+// VNPAY Payment routes
+router.post('/vnpay/create-payment-url', vnpayController.createPaymentUrl);
+router.get('/vnpay/callback', vnpayController.handleCallback);
+
 module.exports = router;
+

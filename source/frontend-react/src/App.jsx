@@ -6,6 +6,7 @@ import { CartPage } from './components/shop/CartPage';
 import { CheckoutModal } from './components/shop/CheckoutModal';
 import { CommentModal } from './components/shop/CommentModal';
 import { ProductDetailModal } from './components/shop/ProductDetailModal';
+import { PaymentCallback } from './components/shop/PaymentCallback';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
 import { useProducts } from './hooks/useProducts';
 import { useCategories } from './hooks/useCategories';
@@ -14,7 +15,7 @@ import { logisticsApi } from './api/logisticsApi';
 import ChatbotWidget from './Chatbot.jsx';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('shop'); // 'shop' | 'cart'
+  const [currentPage, setCurrentPage] = useState('shop'); // 'shop' | 'cart' | 'payment-callback'
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [logisticsCompanies, setLogisticsCompanies] = useState([]);
@@ -32,6 +33,10 @@ export default function App() {
     logisticsApi.getAllCompanies()
       .then(data => setLogisticsCompanies(data))
       .catch(err => console.error('Lỗi nạp đơn vị giao nhận:', err));
+
+    if (window.location.pathname.includes('payment-callback') || window.location.search.includes('vnp_SecureHash')) {
+      setCurrentPage('payment-callback');
+    }
   }, []);
 
   const handleCheckoutSuccess = (order) => {
@@ -58,7 +63,14 @@ export default function App() {
       />
 
       <main className="main-content" style={{ minHeight: '80vh', padding: '24px 0' }}>
-        {currentPage === 'cart' ? (
+        {currentPage === 'payment-callback' ? (
+          <PaymentCallback
+            onReturnHome={() => {
+              window.history.replaceState({}, '', '/');
+              setCurrentPage('shop');
+            }}
+          />
+        ) : currentPage === 'cart' ? (
           <CartPage
             onContinueShopping={() => setCurrentPage('shop')}
             onOpenCheckout={() => setIsCheckoutOpen(true)}
