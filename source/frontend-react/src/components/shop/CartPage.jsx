@@ -234,13 +234,27 @@ export function CartPage({ onContinueShopping, onOpenCheckout }) {
               {/* Checkout Button */}
               <button
                 type="button"
-                onClick={onOpenCheckout}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (typeof onOpenCheckout === 'function') {
+                    onOpenCheckout();
+                  }
+                }}
                 className="btn-checkout-primary"
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  width: '100%',
+                  userSelect: 'none'
+                }}
               >
-                <span>💳 Thanh toán VNPAY ngay</span>
-                <span>➔</span>
+                <span style={{ pointerEvents: 'none' }}>💳 Thanh toán VNPAY ngay</span>
+                <span style={{ pointerEvents: 'none' }}>➔</span>
               </button>
+
 
             </div>
 

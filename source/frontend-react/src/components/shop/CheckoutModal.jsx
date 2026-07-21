@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '../common/Modal';
 import { useCartStore } from '../../stores/cartStore';
 import { orderApi } from '../../api/orderApi';
@@ -6,17 +6,24 @@ import { vnpayApi } from '../../api/vnpayApi';
 
 const money = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
 
-export function CheckoutModal({ isOpen, onClose, logisticsCompanies, onSuccess }) {
+export function CheckoutModal({ isOpen, onClose, logisticsCompanies = [], onSuccess }) {
   const { cart, getTotalPrice, clearCart } = useCartStore();
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
-  const [logisticsCompanyId, setLogisticsCompanyId] = useState(logisticsCompanies[0] ? String(logisticsCompanies[0].id) : '');
+  const [logisticsCompanyId, setLogisticsCompanyId] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('VNPAY'); // Mặc định VNPAY
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    if (logisticsCompanies.length > 0 && !logisticsCompanyId) {
+      setLogisticsCompanyId(String(logisticsCompanies[0].id));
+    }
+  }, [logisticsCompanies]);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
