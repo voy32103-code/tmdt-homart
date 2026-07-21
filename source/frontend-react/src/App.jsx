@@ -31,7 +31,7 @@ export default function App() {
 
   useEffect(() => {
     logisticsApi.getAllCompanies()
-      .then(data => setLogisticsCompanies(data))
+      .then(data => setLogisticsCompanies(Array.isArray(data) ? data : []))
       .catch(err => console.error('Lỗi nạp đơn vị giao nhận:', err));
 
     if (window.location.pathname.includes('payment-callback') || window.location.search.includes('vnp_SecureHash')) {

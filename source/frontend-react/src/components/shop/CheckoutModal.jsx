@@ -6,7 +6,8 @@ import { vnpayApi } from '../../api/vnpayApi';
 
 const money = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
 
-export function CheckoutModal({ isOpen, onClose, logisticsCompanies = [], onSuccess }) {
+export function CheckoutModal({ isOpen, onClose, logisticsCompanies, onSuccess }) {
+  const companies = Array.isArray(logisticsCompanies) ? logisticsCompanies : [];
   const { cart, getTotalPrice, clearCart } = useCartStore();
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
@@ -19,10 +20,10 @@ export function CheckoutModal({ isOpen, onClose, logisticsCompanies = [], onSucc
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    if (logisticsCompanies.length > 0 && !logisticsCompanyId) {
-      setLogisticsCompanyId(String(logisticsCompanies[0].id));
+    if (companies.length > 0 && !logisticsCompanyId) {
+      setLogisticsCompanyId(String(companies[0].id));
     }
-  }, [logisticsCompanies]);
+  }, [companies]);
 
 
   const handleSubmit = async (e) => {
@@ -123,7 +124,7 @@ export function CheckoutModal({ isOpen, onClose, logisticsCompanies = [], onSucc
             value={logisticsCompanyId}
             onChange={(e) => setLogisticsCompanyId(e.target.value)}
           >
-            {logisticsCompanies.map(company => (
+            {companies.map(company => (
               <option key={company.id} value={company.id}>
                 {company.name} - Phí giao: {money.format(company.baseFee)}
               </option>
