@@ -4,17 +4,22 @@ import { RatingStars } from '../common/RatingStars';
 const money = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
 
 export function ProductCard({ product, onAddToCart, onViewDetail, onOpenComment }) {
+  const isOutOfStock = product.stockQuantity <= 0;
+
   return (
-    <div className="product-card card">
+    <div className={`product-card card ${isOutOfStock ? 'out-of-stock' : ''}`}>
       <div className="product-image-wrap" onClick={() => onViewDetail(product)}>
         <img src={product.imageUrl} alt={product.name} loading="lazy" />
         {product.hasDiscount && (
           <span className="badge-discount">{product.discountText}</span>
         )}
+        {isOutOfStock && (
+          <div className="stock-overlay">Hết hàng</div>
+        )}
       </div>
       <div className="product-info">
-        <span className="product-category">{product.categoryName}</span>
-        <h3 className="product-name" onClick={() => onViewDetail(product)}>
+        <span className="product-category">{product.categoryName || 'Gia dụng'}</span>
+        <h3 className="product-name" onClick={() => onViewDetail(product)} title={product.name}>
           {product.name}
         </h3>
         <div className="product-rating">
@@ -33,9 +38,9 @@ export function ProductCard({ product, onAddToCart, onViewDetail, onOpenComment 
             type="button"
             className="btn-add-cart"
             onClick={() => onAddToCart(product)}
-            disabled={product.stockQuantity <= 0}
+            disabled={isOutOfStock}
           >
-            {product.stockQuantity > 0 ? 'Thêm giỏ hàng' : 'Hết hàng'}
+            {isOutOfStock ? 'Hết hàng' : '+ Thêm vào giỏ'}
           </button>
           <button
             type="button"

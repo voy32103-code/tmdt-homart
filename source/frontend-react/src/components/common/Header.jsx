@@ -7,7 +7,8 @@ export function Header({ onOpenCart, onOpenOrderLookup, activeCategory, onSelect
   return (
     <header className="site-header">
       <div className="brand" onClick={() => onSelectCategory('all')} style={{ cursor: 'pointer' }}>
-        HomeMart
+        <span className="brand-icon">✨</span>
+        <span>HomeMart</span>
       </div>
       <nav>
         <button
@@ -22,17 +23,17 @@ export function Header({ onOpenCart, onOpenOrderLookup, activeCategory, onSelect
           onClick={onOpenOrderLookup}
           type="button"
         >
-          Tra cứu đơn hàng
+          🔍 Tra cứu đơn hàng
         </button>
         <button
           className="nav-button cart-badge-btn"
           onClick={onOpenCart}
           type="button"
         >
-          Giỏ hàng <span className="badge">{totalItems}</span>
+          🛒 Giỏ hàng {totalItems > 0 && <span className="badge">{totalItems}</span>}
         </button>
         <a href="/admin.html" className="nav-button admin-link">
-          Quản trị
+          ⚙️ Quản trị
         </a>
       </nav>
     </header>

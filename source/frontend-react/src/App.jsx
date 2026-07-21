@@ -53,18 +53,61 @@ export default function App() {
       />
 
       <main className="container main-content" style={{ minHeight: '80vh', padding: '24px 16px' }}>
-        <section className="hero">
+        <section className="hero card">
           <div className="hero-content">
-            <span className="eyebrow">Sàn thương mại đồ gia dụng</span>
-            <h1>Mua sắm nhà cửa gọn hơn, giao hàng rõ ràng hơn</h1>
-            <p>Kết nối nhiều cửa hàng uy tín với các đơn vị giao nhận phù hợp về chất lượng và chi phí.</p>
+            <span className="hero-pill">🌿 Mua sắm thông minh cho tổ ấm</span>
+            <h1>Thiết bị gia dụng hiện đại, giao nhận tận tâm</h1>
+            <p>Khám phá sản phẩm nhà bếp, đồ dùng thông minh chính hãng với chi phí tối ưu và đối tác giao vận uy tín.</p>
+            <div className="hero-cta-group">
+              <button
+                type="button"
+                className="btn-hero-primary"
+                onClick={() => {
+                  const el = document.querySelector('.shop-section');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                Khám phá sản phẩm ↓
+              </button>
+              <button
+                type="button"
+                className="btn-hero-secondary"
+                onClick={() => setIsOrderLookupOpen(true)}
+              >
+                🔍 Tra cứu đơn hàng
+              </button>
+            </div>
+            <div className="hero-features-strip">
+              <div className="feature-item">
+                <span className="icon">🚀</span>
+                <span>Giao hàng nhanh 2h</span>
+              </div>
+              <div className="feature-item">
+                <span className="icon">🛡️</span>
+                <span>Bảo hành chính hãng</span>
+              </div>
+              <div className="feature-item">
+                <span className="icon">💎</span>
+                <span>Giá cạnh tranh</span>
+              </div>
+            </div>
           </div>
-          <div className="hero-image">
+          <div className="hero-image-wrap">
             <img
               src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1200&q=80"
               alt="HomeMart Banner"
-              style={{ borderRadius: '12px', width: '100%', maxHeight: '320px', objectFit: 'cover' }}
             />
+            <div className="hero-glass-card">
+              <div className="glass-stat">
+                <span className="num">100%</span>
+                <span className="lbl">Chính hãng</span>
+              </div>
+              <div className="glass-divider"></div>
+              <div className="glass-stat">
+                <span className="num">4.9★</span>
+                <span className="lbl">Đánh giá tốt</span>
+              </div>
+            </div>
           </div>
         </section>
 
