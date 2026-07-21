@@ -236,11 +236,13 @@ export function CartPage({ onContinueShopping, onOpenCheckout }) {
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   if (typeof onOpenCheckout === 'function') {
                     onOpenCheckout();
                   }
                 }}
                 className="btn-checkout-primary"
+
                 style={{
                   display: 'flex',
                   alignItems: 'center',
