@@ -168,6 +168,7 @@ export default function App() {
 
       {detailProduct && (
         <ProductDetailModal
+          isOpen={!!detailProduct}
           product={detailProduct}
           onClose={() => setDetailProduct(null)}
           onAddToCart={handleAddToCartAndNotify}
@@ -175,12 +176,15 @@ export default function App() {
         />
       )}
 
+
       {commentProduct && (
         <CommentModal
+          isOpen={!!commentProduct}
           product={commentProduct}
           onClose={() => setCommentProduct(null)}
         />
       )}
+
 
       {/* AI Chatbot Floating Widget */}
       <ChatbotWidget />

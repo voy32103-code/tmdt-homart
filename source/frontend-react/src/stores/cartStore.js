@@ -18,8 +18,9 @@ export const useCartStore = create((set, get) => ({
     let newCart;
 
     if (existingIndex > -1) {
-      newCart = [...cart];
-      newCart[existingIndex].quantity += quantity;
+      newCart = cart.map((item, idx) =>
+        idx === existingIndex ? { ...item, quantity: item.quantity + quantity } : item
+      );
     } else {
       newCart = [
         ...cart,
