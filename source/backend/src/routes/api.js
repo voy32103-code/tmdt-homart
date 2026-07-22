@@ -3,6 +3,7 @@ const router = express.Router();
 
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
+const { securityHeaders, createRateLimiter } = require('../middleware/security');
 
 const authController = require('../controllers/authController');
 const categoryController = require('../controllers/categoryController');
@@ -14,9 +15,15 @@ const reportController = require('../controllers/reportController');
 const chatbotController = require('../controllers/chatbotController');
 const vnpayController = require('../controllers/vnpayController');
 
-// Auth routes
+// Rate Limiter instances
+const authLimiter = createRateLimiter({ windowMs: 60 * 1000, max: 10, message: 'Đăng nhập quá nhiều lần. Vui lòng đợi 1 phút.' });
+const sensitiveLimiter = createRateLimiter({ windowMs: 60 * 1000, max: 20, message: 'Yêu cầu quá dồn dập. Vui lòng thử lại sau giây lát.' });
 
-router.post('/auth/login', validate('login'), authController.login);
+// Apply Security Headers to all routes
+router.use(securityHeaders);
+
+// Auth routes
+router.post('/auth/login', authLimiter, validate('login'), authController.login);
 router.post('/auth/logout', authController.logout);
 
 // Summary route
@@ -48,7 +55,7 @@ router.put('/promotions/:id', requireAdmin, promotionController.updatePromotion)
 router.delete('/promotions/:id', requireAdmin, promotionController.deletePromotion);
 
 // Order routes (Client & Admin)
-router.post('/orders', validate('order'), orderController.createOrder);
+router.post('/orders', sensitiveLimiter, validate('order'), orderController.createOrder);
 router.get('/orders/code/:code', orderController.getOrderByCode);
 router.get('/orders/phone/:phone', orderController.getOrdersByPhone);
 
@@ -72,7 +79,7 @@ router.get('/admin/comments', requireAdmin, productController.getAllCommentsAdmi
 router.delete('/admin/comments/:id', requireAdmin, productController.deleteComment);
 
 // Chatbot route
-router.post('/chatbot', chatbotController.handleChatbot);
+router.post('/chatbot', sensitiveLimiter, chatbotController.handleChatbot);
 
 // Admin Report routes
 router.get('/admin/reports/overview', requireAdmin, reportController.getOverview);
@@ -82,8 +89,9 @@ router.get('/admin/reports/revenue-by-category', requireAdmin, reportController.
 router.get('/admin/reports/order-status-summary', requireAdmin, reportController.getOrderStatusSummary);
 
 // VNPAY Payment routes
-router.post('/vnpay/create-payment-url', vnpayController.createPaymentUrl);
+router.post('/vnpay/create-payment-url', sensitiveLimiter, vnpayController.createPaymentUrl);
 router.get('/vnpay/callback', vnpayController.handleCallback);
+router.get('/vnpay/ipn', vnpayController.handleIpn);
 
 module.exports = router;
 

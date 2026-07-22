@@ -1,7 +1,7 @@
 const prisma = require('../config/prisma');
 
 class ProductRepository {
-  async findAll({ categoryId, search } = {}) {
+  async findAll({ categoryId, search, page, limit } = {}) {
     const where = {};
     if (categoryId) where.categoryId = Number(categoryId);
     if (search) {
@@ -12,7 +12,7 @@ class ProductRepository {
       ];
     }
 
-    return prisma.product.findMany({
+    const queryOptions = {
       where,
       include: {
         category: true,
@@ -21,7 +21,23 @@ class ProductRepository {
         comments: { orderBy: { createdAt: 'desc' } }
       },
       orderBy: { id: 'asc' }
-    });
+    };
+
+    if (page && limit) {
+      const pageNum = Math.max(1, Number(page));
+      const limitNum = Math.min(100, Math.max(1, Number(limit)));
+      const skip = (pageNum - 1) * limitNum;
+
+      const [items, total] = await Promise.all([
+        prisma.product.findMany({ ...queryOptions, skip, take: limitNum }),
+        prisma.product.count({ where })
+      ]);
+
+      return { items, total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) };
+    }
+
+    const items = await prisma.product.findMany(queryOptions);
+    return { items, total: items.length, page: 1, limit: items.length, totalPages: 1 };
   }
 
   async findById(id) {

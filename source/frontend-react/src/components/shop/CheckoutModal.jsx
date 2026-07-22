@@ -20,10 +20,11 @@ export function CheckoutModal({ isOpen, onClose, logisticsCompanies, onSuccess }
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    if (companies.length > 0 && !logisticsCompanyId) {
-      setLogisticsCompanyId(String(companies[0].id));
+    const list = Array.isArray(logisticsCompanies) ? logisticsCompanies : [];
+    if (list.length > 0 && !logisticsCompanyId) {
+      setLogisticsCompanyId(String(list[0].id));
     }
-  }, [companies]);
+  }, [logisticsCompanies, logisticsCompanyId]);
 
 
   const handleSubmit = async (e) => {

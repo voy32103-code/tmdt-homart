@@ -81,7 +81,7 @@ export default function ChatbotWidget() {
           if (errData && errData.message) {
             errMessage = errData.message;
           }
-        } catch (_) {}
+        } catch {}
         throw new Error(errMessage);
       }
 

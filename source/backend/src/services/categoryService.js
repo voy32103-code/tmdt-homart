@@ -1,8 +1,17 @@
 const categoryRepo = require('../repositories/categoryRepository');
+const cache = require('../config/cache');
 
 class CategoryService {
   async getAllCategories(filters) {
-    return categoryRepo.findAll(filters);
+    const cacheKey = !filters ? 'categories:all' : null;
+    if (cacheKey) {
+      const cached = cache.get(cacheKey);
+      if (cached) return cached;
+    }
+
+    const categories = await categoryRepo.findAll(filters);
+    if (cacheKey) cache.set(cacheKey, categories, 120);
+    return categories;
   }
 
   async getCategoryById(id) {
@@ -16,7 +25,7 @@ class CategoryService {
     const existing = await categoryRepo.findBySlug(slug);
     if (existing) throw new Error('Đường dẫn SEO (Slug) danh mục đã tồn tại');
 
-    return categoryRepo.create({
+    const created = await categoryRepo.create({
       name: data.name,
       slug: slug || `cat-${Date.now()}`,
       sortOrder: Number(data.sortOrder || 0),
@@ -24,6 +33,9 @@ class CategoryService {
       seoDescription: data.seoDescription || null,
       parentId: data.parentId ? Number(data.parentId) : null
     });
+
+    cache.del('categories:all');
+    return created;
   }
 
   async updateCategory(id, data) {
@@ -35,13 +47,16 @@ class CategoryService {
       if (existing) throw new Error('Đường dẫn SEO (Slug) đã được sử dụng');
     }
 
-    return categoryRepo.update(id, {
+    const updated = await categoryRepo.update(id, {
       name: data.name !== undefined ? data.name : category.name,
       slug: data.slug !== undefined ? data.slug : category.slug,
       sortOrder: data.sortOrder !== undefined ? Number(data.sortOrder) : category.sortOrder,
       seoTitle: data.seoTitle !== undefined ? data.seoTitle : category.seoTitle,
       seoDescription: data.seoDescription !== undefined ? data.seoDescription : category.seoDescription
     });
+
+    cache.del('categories:all');
+    return updated;
   }
 
   async deleteCategory(id) {
@@ -50,6 +65,7 @@ class CategoryService {
       throw new Error(`Không thể xóa danh mục này vì còn ${productCount} sản phẩm trực thuộc`);
     }
     await categoryRepo.delete(id);
+    cache.del('categories:all');
     return { success: true, message: 'Đã xóa danh mục thành công' };
   }
 }

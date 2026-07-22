@@ -32,10 +32,10 @@ exports.createPaymentUrl = (req, { orderCode, amount, orderInfo, returnUrl }) =>
   const vnpUrl = process.env.VNP_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
   const callbackUrl = returnUrl || process.env.VNP_RETURNURL || 'http://localhost:5173/payment-callback';
 
-  let ipAddr = req.headers['x-forwarded-for'] ||
-    req.connection.remoteAddress ||
-    req.socket.remoteAddress ||
-    req.connection.socket?.remoteAddress ||
+  let ipAddr = (req.headers && req.headers['x-forwarded-for']) ||
+    req.ip ||
+    req.socket?.remoteAddress ||
+    req.connection?.remoteAddress ||
     '127.0.0.1';
 
   if (ipAddr.includes('::ffff:')) {
@@ -107,4 +107,8 @@ exports.verifyReturnUrl = (query) => {
     orderInfo: vnp_Params['vnp_OrderInfo'],
     bankCode: vnp_Params['vnp_BankCode']
   };
+};
+
+exports.verifyIpn = (query) => {
+  return exports.verifyReturnUrl(query);
 };

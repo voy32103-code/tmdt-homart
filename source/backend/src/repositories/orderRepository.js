@@ -1,7 +1,7 @@
 const prisma = require('../config/prisma');
 
 class OrderRepository {
-  async findAll({ status, search } = {}) {
+  async findAll({ status, search, page, limit } = {}) {
     const where = {};
     if (status && status !== 'all') where.status = status;
     if (search) {
@@ -12,7 +12,7 @@ class OrderRepository {
       ];
     }
 
-    return prisma.order.findMany({
+    const queryOptions = {
       where,
       include: {
         customer: true,
@@ -20,7 +20,23 @@ class OrderRepository {
         items: { include: { product: true } }
       },
       orderBy: { createdAt: 'desc' }
-    });
+    };
+
+    if (page && limit) {
+      const pageNum = Math.max(1, Number(page));
+      const limitNum = Math.min(100, Math.max(1, Number(limit)));
+      const skip = (pageNum - 1) * limitNum;
+
+      const [items, total] = await Promise.all([
+        prisma.order.findMany({ ...queryOptions, skip, take: limitNum }),
+        prisma.order.count({ where })
+      ]);
+
+      return { items, total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) };
+    }
+
+    const items = await prisma.order.findMany(queryOptions);
+    return { items, total: items.length, page: 1, limit: items.length, totalPages: 1 };
   }
 
   async findById(id) {

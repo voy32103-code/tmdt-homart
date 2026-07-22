@@ -1,4 +1,9 @@
 const jwt = require('jsonwebtoken');
+
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  console.warn('⚠️ CRITICAL SECURITY WARNING: JWT_SECRET environment variable is missing in Production environment!');
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || 'homemart-super-secret-key';
 
 function authenticateToken(req, res, next) {

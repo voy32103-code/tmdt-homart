@@ -4,7 +4,8 @@
   "description": "Backend API for household marketplace lab 4",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node test/services.test.js"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

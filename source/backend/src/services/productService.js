@@ -1,4 +1,5 @@
 const productRepo = require('../repositories/productRepository');
+const cache = require('../config/cache');
 
 class ProductService {
   mapProduct(item) {
@@ -62,9 +63,38 @@ class ProductService {
     };
   }
 
-  async getAllProducts(filters) {
-    const products = await productRepo.findAll(filters);
-    return products.map(p => this.mapProduct(p));
+  async getAllProducts(filters = {}) {
+    const isDefaultQuery = !filters.categoryId && !filters.search && !filters.page;
+    const cacheKey = isDefaultQuery ? 'products:default' : null;
+
+    if (cacheKey) {
+      const cached = cache.get(cacheKey);
+      if (cached) return cached;
+    }
+
+    const result = await productRepo.findAll(filters);
+
+    if (result && Array.isArray(result.items)) {
+      const mappedItems = result.items.map(p => this.mapProduct(p));
+      const response = {
+        data: mappedItems,
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+        totalPages: result.totalPages
+      };
+
+      if (filters.page || filters.limit) {
+        return response;
+      }
+
+      if (cacheKey) cache.set(cacheKey, mappedItems, 60);
+      return mappedItems;
+    }
+
+    const mapped = (result || []).map(p => this.mapProduct(p));
+    if (cacheKey) cache.set(cacheKey, mapped, 60);
+    return mapped;
   }
 
   async getProductById(id) {
@@ -102,6 +132,7 @@ class ProductService {
       });
     }
 
+    cache.flushPattern('products:');
     return this.getProductById(newProduct.id);
   }
 
@@ -135,6 +166,7 @@ class ProductService {
       });
     }
 
+    cache.flushPattern('products:');
     return this.getProductById(id);
   }
 
@@ -142,6 +174,7 @@ class ProductService {
     const product = await productRepo.findById(id);
     if (!product) throw new Error('Không tìm thấy sản phẩm để xóa');
     await productRepo.delete(id);
+    cache.flushPattern('products:');
     return { success: true, message: 'Đã xóa sản phẩm thành công' };
   }
 

@@ -2,9 +2,24 @@ const prisma = require('../config/prisma');
 const orderRepo = require('../repositories/orderRepository');
 
 class OrderService {
-  async getAllOrders(filters) {
-    const orders = await orderRepo.findAll(filters);
-    return orders.map(o => this.formatOrder(o));
+  async getAllOrders(filters = {}) {
+    const result = await orderRepo.findAll(filters);
+
+    if (result && Array.isArray(result.items)) {
+      const mappedItems = result.items.map(o => this.formatOrder(o));
+      if (filters.page || filters.limit) {
+        return {
+          data: mappedItems,
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          totalPages: result.totalPages
+        };
+      }
+      return mappedItems;
+    }
+
+    return (result || []).map(o => this.formatOrder(o));
   }
 
   async getOrderByCode(orderCode) {
