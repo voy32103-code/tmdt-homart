@@ -26,6 +26,10 @@ function formatDate(date) {
   return `${yyyy}${MM}${dd}${HH}${mm}${ss}`;
 }
 
+function urlEncode(str) {
+  return encodeURIComponent(String(str)).replace(/%20/g, '+');
+}
+
 exports.createPaymentUrl = (req, { orderCode, amount, orderInfo, returnUrl }) => {
   const tmnCode = process.env.VNP_TMNCODE || 'KZ65TSRV';
   const secretKey = process.env.VNP_HASHSECRET || 'C27G7FNPQCUUJI50A1X37S5N8Y425ZTP';
@@ -65,7 +69,7 @@ exports.createPaymentUrl = (req, { orderCode, amount, orderInfo, returnUrl }) =>
   const sortedParams = sortObject(vnp_Params);
 
   const signData = Object.keys(sortedParams)
-    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(sortedParams[key])}`)
+    .map(key => `${urlEncode(key)}=${urlEncode(sortedParams[key])}`)
     .join('&');
 
   const hmac = crypto.createHmac('sha512', secretKey);
@@ -87,7 +91,7 @@ exports.verifyReturnUrl = (query) => {
   const sortedParams = sortObject(vnp_Params);
 
   const signData = Object.keys(sortedParams)
-    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(sortedParams[key])}`)
+    .map(key => `${urlEncode(key)}=${urlEncode(sortedParams[key])}`)
     .join('&');
 
   const hmac = crypto.createHmac('sha512', secretKey);
