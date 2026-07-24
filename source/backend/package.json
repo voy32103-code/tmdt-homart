@@ -4,6 +4,7 @@
   "description": "Backend API for household marketplace lab 4",
   "main": "server.js",
   "scripts": {
+    "build": "prisma generate",
     "start": "node server.js"
   },
   "dependencies": {
