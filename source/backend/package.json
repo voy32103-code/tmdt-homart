@@ -4,16 +4,13 @@
   "description": "Backend API for household marketplace lab 4",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "test": "node test/services.test.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "bcrypt": "^6.0.0",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "msnodesqlv8": "^4.4.0",
-    "mssql": "^11.0.1",
     "pg": "^8.22.0",
     "prisma": "^5.22.0",
     "zod": "^4.4.3"
