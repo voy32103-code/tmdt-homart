@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 
@@ -27,27 +28,37 @@ const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const FRONTEND_DIR = path.join(__dirname, "..", "frontend");
+
+// CORS — cho phép frontend Vercel và dev local gọi API
+const allowedOrigins = [
+  'https://tmdt-homart.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:4173',
+];
+app.use(cors({
+  origin: (origin, callback) => {
+    // Cho phép các tool như Postman (không có origin) và các origin hợp lệ
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Không được phép bởi CORS'));
+    }
+  },
+  credentials: true,
+}));
 
 // Parse JSON and urlencoded bodies
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Health check
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'HomeMart API đang hoạt động' });
+});
+
 // API routes
 const apiRouter = require('./src/routes/api');
 app.use('/api', apiRouter);
-
-// Serve static files
-app.use(express.static(FRONTEND_DIR));
-
-// Fallback to index.html/admin.html for general SPA routing
-app.get('/{*splat}', (req, res) => {
-  if (req.path.startsWith('/admin')) {
-    res.sendFile(path.join(FRONTEND_DIR, 'admin.html'));
-  } else {
-    res.sendFile(path.join(FRONTEND_DIR, 'index.html'));
-  }
-});
 
 // Global error handler
 app.use((err, req, res, next) => {
