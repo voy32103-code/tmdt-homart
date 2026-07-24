@@ -1,30 +1,8 @@
+// dotenv chỉ load nếu biến chưa được set (Render env vars sẽ không bị ghi đè)
+require('dotenv').config({ path: require('path').join(__dirname, '.env'), override: false });
+
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
-const fs = require('fs');
-
-// Load .env file
-[path.join(__dirname, ".env"), path.join(__dirname, "..", ".env"), path.join(__dirname, "..", "..", ".env")].forEach(envPath => {
-  if (fs.existsSync(envPath)) {
-    const envContent = fs.readFileSync(envPath, "utf-8");
-    envContent.split(/\r?\n/).forEach(line => {
-      const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith("#")) {
-        const parts = trimmed.split("=");
-        if (parts.length >= 2) {
-          const key = parts[0].trim();
-          const value = parts.slice(1).join("=").trim().replace(/^['"]|['"]$/g, "");
-          if (key) {
-            const isDummy = value.startsWith("your_") || value === "";
-            if (!process.env[key] || !isDummy) {
-              process.env[key] = value;
-            }
-          }
-        }
-      }
-    });
-  }
-});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
