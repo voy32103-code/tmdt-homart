@@ -28,7 +28,6 @@ class CategoryService {
     const created = await categoryRepo.create({
       name: data.name,
       slug: slug || `cat-${Date.now()}`,
-      sortOrder: Number(data.sortOrder || 0),
       seoTitle: data.seoTitle || null,
       seoDescription: data.seoDescription || null,
       parentId: data.parentId ? Number(data.parentId) : null
@@ -50,7 +49,6 @@ class CategoryService {
     const updated = await categoryRepo.update(id, {
       name: data.name !== undefined ? data.name : category.name,
       slug: data.slug !== undefined ? data.slug : category.slug,
-      sortOrder: data.sortOrder !== undefined ? Number(data.sortOrder) : category.sortOrder,
       seoTitle: data.seoTitle !== undefined ? data.seoTitle : category.seoTitle,
       seoDescription: data.seoDescription !== undefined ? data.seoDescription : category.seoDescription
     });
